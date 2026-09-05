@@ -7,6 +7,109 @@ paper's PRIMARY benchmark.** The earlier 199-dataset build is retained as the pr
 (the headline - NoMaS beats the UOMS field incl. EM/MV/IFOREST-R - reproduces on both, so the result is
 not a filtering artifact). All code + result CSVs live in `experiments/streamline/`.
 
+## Update 2026-09-05: Stage 0 point-anomaly filter, richer metrics, deep detectors, alpha spectrum
+
+**Stage 0 (NEW) - drop point/short-anomaly TS series.** A series whose anomaly content is <50% in
+segments >= W/2 (=32) raw steps cannot form a majority-anomaly window at W=64, so W-windowing yields
+only diluted near-normal "anomaly" labels (verified: CreditCard median window-purity 0.016, 83% single
+raw point; GECCO 0.33). Detector-free, computed from raw label runs (`is_point_anom` in
+`pipeline_final.py`). Drops exactly 2 datasets (CreditCard, GECCO), 176 -> **174** (tsbad_m 43 -> 41),
+zero collateral. Chosen over a per-window purity relabel, which collaterally shrank n_eff on 3 healthy
+datasets (+12 lost >30% n_eff) for only a mild ceiling gain. Root-caused via a labeling-artifact check
+(the user's instinct): only 2/43 MTS datasets are affected; the other 41 are genuine segment anomalies.
+
+**Filtered leaderboard (173 kept, 101 local / 72 global).** NoMaS matched **beats MV on BOTH micro
+(0.143 vs 0.153) and macro (0.146 vs 0.150), p=0.010**, and beats EM (0.165, p=0.003); crushes
+consensus/MC/HITS/random (~0.23). The prior tie with MV on macro flips to a win once the 2 mislabeled
+point-anomaly datasets are removed.
+
+**Report distribution, not just mean (regret is right-skewed).** median regret: matched **0.071** vs MV
+0.089 vs EM 0.091 (mean 0.14x for all - a shared hard tail inflates the mean equally). %-oracle (picked
+the exactly-best detector): matched 19%, beta=1 **25%**, MV/EM 13%. %-badly-wrong (>0.3): matched 13%,
+MV 17%. Put median + p90 + %oracle + %>.3 + the ECDF in the leaderboard, not mean alone. The Wilcoxon is
+already rank-based so it is unaffected. Max regret 0.939 is shared by all methods (datasets no label-free
+heuristic solves). Tail inspection (co-computed): the high-regret datasets are genuine hard SELECTION
+(a real cluster of good detectors we missed), NOT mislabeled - two failure modes, wrong-family and
+right-family-wrong-member; the global half is MV-fixable, the local half fails for MV too.
+
+**Deep detectors on all 173 (Modal, A10G, 25 classical + 7 deep co-computed on the same hardened test;
+`modal_deep.py`, `STREAM_DEEP_MODAL.csv`).** DeepSVDD is the **best single detector** (mean ap_norm
+0.161, edging LOF_k10 0.151). But no single deep model matches classical diversity: best-classical
+oracle 0.290 > best-deep 0.237; combined 0.328 (deep complementary, +0.038 ceiling, beats best classical
+on 32%). All-bad gate: of 50 datasets all-bad by classical (best<=0.10), deep rescues **12** above 0.10
+-> "all-bad" is pool-relative, keep those. Extends ADBench/TSB-AD "simple is competitive" into the
+hard-anomaly regime. Reusable pipeline (bundle on modal volume + harness).
+
+**Full-spectrum synthetic generation + alpha (`gen_alpha_selector.py`).** Anomaly type = single-value
+weird (marginal, global detectors) <-> combination weird (voids, local detectors), set by how the
+deviation is spread across features at fixed total weirdness. Generate-at-alpha: one generator, alpha
+in [0,1] (alpha=0 one feature at a tail value; alpha=1 all features at real permuted values). Result:
+the **best-alpha ORACLE cuts regret 0.141 -> 0.077 (nearly half)** - the correctly-typed probe exists on
+the spectrum for most datasets (framework validated). BUT label-free alpha selectors (max-disagreement,
+alpha-from-local_ev) TIE binary matched (0.141), not reaching it. **Open problem = estimating alpha
+(anomaly type) from normal data**: structural void measures (silhouette AUC 0.62, joint-multimodality
+0.61) confirm the user's "unimodal->marginal, multimodal-voids->combination" intuition in DIRECTION but
+only ~0.6; local_ev ~0.79 but as a continuous alpha does not beat binary. Marginal generator is
+global-biased, permutation generator local-biased; an OOD drop-in-cluster filter does not fix the tail
+(the issue is type-bias, not in-distribution contamination - synthetics are 1-7% normal-like). All
+selection stays label-free (normals + synthesized-from-normals); labels only score results + mark oracles.
+
+## Update 2026-09-05b: deep in the selection pool (a), raw-TS deep (b), synthetic-source + band tests
+
+**(a) Deep detectors in the SELECTION pool (Modal, ap+a1+a4 co-computed per detector; `modal_deep.py`,
+`STREAM_EXPANDED_SEL.csv`, 173 datasets).** Our label-free matched selector EXTENDS cleanly to deep:
+when a deep detector is the oracle (56/173, 32%) it picks deep 43/56 = **77%** of the time (the a1/a4
+probe generalizes to DeepSVDD/AE), and does slightly better on deep-oracle datasets (regret 0.157) than
+classical-oracle ones (0.174). But adding deep to the pool does NOT change net selection: regret-vs-full-
+oracle 0.168 with deep vs 0.167 ignoring deep (p=0.565) - the oracle rises +0.038 and we capture the same
+fraction. So deep is worth adding for the DETECTOR benchmark (higher ceiling), neutral for SELECTION.
+
+**(b) Raw-sequence deep on MTS via TSB-AD (`modal_tsbad.py`, `STREAM_TSBAD.csv`, 34 datasets, TSB-AD
+native temporal-split protocol - NOT construct-matched to the tabular hardened pipeline).** Best raw
+model **OmniAnomaly 0.354**, then LSTMAD 0.261, IForest_raw 0.255, USAD/TranAD ~0.21; **transformers
+underperform** (TimesNet 0.095, AnomalyTransformer 0.073 - below raw IForest), reproducing TSB-AD's
+headline. A matched raw-vs-window comparison (same split/labels) is the clean follow-up.
+
+**Synthetic SOURCE (`STREAM_SRC_COMPARE.csv`): val is correct, train is worse.** matched regret: val-
+synth/val-ref **0.144** < train-synth/train-ref 0.153 < train-synth/val-ref 0.159; val wins even on the
+low-n_val half (0.149 vs 0.171). Reason: detectors are fit on train, so train-synthetics probe memorized
+points (artifact), while val-synthetics probe UNSEEN normal structure (what predicts test). Not a coverage
+issue -> keep synth from val. The band edges are detector-free (severity quantile + NN scale) so they can
+be calibrated on train without leak, but this is moot given val-source wins.
+
+**Band-filtered alpha (`STREAM_GENALPHA_BAND.csv`): does not close the estimator gap.** Keeping synthetics
+in the difficulty band [OOD floor, hardening ceiling] (both label-free from normals) leaves the deployable
+selectors at binary-matched level (max-disagreement 0.144) while the best-alpha ORACLE stays at ~0.074.
+So difficulty-normalization was not the missing piece. STATE OF THE ALPHA LINE: framework proven (oracle
+~0.074-0.077, ~half the binary regret, robust across band/no-band), but NO label-free alpha estimator
+(max-disagreement, local_ev-alpha, structural void measures, band-normalized) reaches it - the anomaly-
+type estimator is the genuine open problem; binary matched (0.141-0.146, beats MV) is the current best.
+
+## Update 2026-09-05c: alpha-estimator attempts, few-shot upper bound, void structure (alpha line CLOSED)
+
+**Alpha estimator (`alpha_estimator.py`, 173 datasets).** Five estimators vs the best-alpha oracle
+(0.075/0.077): binary matched 0.138/0.145, max-disagreement 0.142/0.149, MARGIN 0.144/0.151, CONSENSUS
+0.144/0.146, LEARNED-alpha LOO random-forest on label-free features (corr-void, silhouette, PC1-kurtosis,
+d, local_ev) 0.138/**0.138** (best deployable MACRO, +0.007 - a faint learnable signal, tiny). None nears
+the oracle; anomaly-TYPE is under-determined by the normals.
+
+**Few-shot upper bound (`alpha_semisup.py`): 10% labeled anomalies calibrate, regret on held-out 90%.**
+binary matched (unsup) 0.135; alpha-via-10% 0.088; **direct-10% (measure each detector's ap on the 10%
+anomalies, pick best - no synthetics) 0.018** (median 70 calib anomalies). A sliver of supervision nearly
+solves selection, and routing THROUGH the synthetic probe HURTS once labels exist (0.088 vs 0.018).
+Positioning: NoMaS/synthetic-alpha is the best tool for the ZERO-label regime (beats UOMS); with >=10%
+labels use them directly on detectors. The zero-label regime is where the hard problem lives.
+
+**Void structure explains the estimator failure (`void_analysis.py`).** best-alpha UNCORRELATED with every
+void/placement measure: void_mass (single-Gaussian mass in mixture-void regions, user's measure) rho -0.05,
+log-lik gap -0.06, n_modes -0.03, void_fill -0.03, hull_ext +0.02, embedded +0.02 (all p>0.4). Structure
+EXISTS - normals very multimodal (void_mass 0.82, 7.7 modes), anomalies mostly void-filling (51% void-fill,
+27% embedded, 22% hull-exterior) - but the winning anomaly TYPE is structurally decoupled from it. Coarse
+family weakly predictable (local_ev AUC 0.79); finer best-alpha carries no geometric signal. ALPHA LINE
+(complete arc): framework proven -> estimator fails -> WHY (best-alpha decoupled from void geometry) ->
+few-shot blows past it (0.018). Publishable: positive method + characterized/explained open problem + few-
+shot upper bound.
+
 ## Migration checklist (to finish promoting streamlined -> primary)
 - [x] Selection pipeline + final set (`STREAM_FINAL2_SET.csv`, 176 datasets)
 - [x] Full EDA (`STREAM_EDA2_ALL.csv`): sizes, diversity, marginal+joint multimodality, solvability, family
