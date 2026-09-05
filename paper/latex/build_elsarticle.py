@@ -30,6 +30,9 @@ def uni(s):
 
 
 def main():
+    # start clean: stale _tex artifacts (e.g. a previous paper's appendix.tex) get grafted by pack
+    # even when the current HTML has no appendix. Always rebuild _tex from scratch.
+    shutil.rmtree(os.path.join(ROOT, "_tex"), ignore_errors=True)
     sh([PY, os.path.join(SKILL, "scripts", "convert_to_tex.py"),
         "--input", "docs/index.html", "--out-dir", "_tex", "--columns", "2"])
     sh([PY, os.path.join(SKILL, "scripts", "pack_tmlr_bundle.py"),
@@ -60,6 +63,8 @@ def main():
                       "\\section*{Data and code availability}")
     # strip any leaked download-badge hrefs; map stray unicode
     tex = re.sub(r"\\href\{nomas[^}]*\}\{[^}]*\}", "", tex)
+    # strip the HTML page footer ("ADReal $\cdot$ <title>") that the converter pulls into the body
+    tex = re.sub(r"ADReal \$\\cdot\$ [^\n]*\n?", "", tex)
     tex = uni(tex)
 
     # make long bibliography URLs breakable: xurl breaks anywhere, and inside
@@ -72,10 +77,10 @@ def main():
         return seg
     tex = re.sub(r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", _bib_urls, tex, flags=re.S)
 
-    # promote the two WIDE figures (fig1 two-panel, fig4 bars) to full-width figure*
+    # promote the two WIDE figures (fig_anisotropy two-panel, fig_leaderboard bars) to full-width figure*
     def promote(mobj):
         blk = mobj.group(0)
-        if "fig1_rho" in blk or "fig4_regret" in blk:
+        if "fig_anisotropy" in blk or "fig_leaderboard" in blk:
             blk = blk.replace(r"\begin{figure}[tbp]", r"\begin{figure*}[t]").replace(r"\end{figure}", r"\end{figure*}")
         return blk
     tex = re.sub(r"\\begin\{figure\}\[tbp\].*?\\end\{figure\}", promote, tex, flags=re.S)
@@ -93,8 +98,9 @@ def main():
         "\\address[hit]{School of Computer Science, Faculty of Sciences, Holon Institute of Technology (HIT), Holon, Israel}\n"
         "\\address[afeka]{Intelligent Systems, Afeka Academic College of Engineering, Tel-Aviv, Israel}")
     tex = tex.replace("__JOURNAL__", "Neurocomputing")
-    tex = tex.replace("\\title{Anomaly Detector Model Selection by Normal Manifold Separability}",
-                      "\\title{\\vspace*{-2\\baselineskip}Anomaly Detector Model Selection by Normal Manifold Separability}")
+    NEWTITLE = "No Easy Wins: A Contamination-Controlled Benchmark for Unsupervised Model Selection in Anomaly Detection"
+    tex = tex.replace("\\title{" + NEWTITLE + "}",
+                      "\\title{\\vspace*{-2\\baselineskip}" + NEWTITLE + "}")
 
     io.open(main_p, "w", encoding="utf-8").write(tex)
     print(f"grafted: abstract {len(abstract)}c, figure* = {tex.count(chr(92)+'begin{figure*}')}, "

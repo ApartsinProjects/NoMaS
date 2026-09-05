@@ -86,9 +86,12 @@ KATEX = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.
   onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\(',right:'\\\\)',display:false},{left:'\\\\[',right:'\\\\]',display:true}]});"></script>"""
 
 
-# Download badges suppressed while the ADReal draft is in progress: the nomas.* PDFs/DOCX are
-# stale (old paper) until the derived artifacts are rebuilt from this source. Restore when they are.
-DOCXLINKS = ""
+# Only the LaTeX 2-col PDF is rebuilt from the current ADReal source; the 1-col PDF and DOCX
+# artifacts are not regenerated yet, so their badges stay off until they are.
+DOCXLINKS = """<div class="docxlinks">
+<a class="docxlink" href="nomas-2col-latex.pdf" download>&#8595; PDF (2-col, LaTeX)</a>
+</div>
+"""
 
 import re as _re
 
