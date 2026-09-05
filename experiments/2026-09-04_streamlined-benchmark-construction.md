@@ -252,3 +252,39 @@ STREAM_RANK/IFR/UDR/PSEUDO.csv.
 `score2.py` (solvability+family); `stream_multimodality.py` (marginal+joint modality); `rank.py`
 (selector leaderboard). Analysis: `stream_suspects.py`, `stream_pca_or.py`, `stream_hist_bins.py`,
 `stream_combined.py`/`stream_sequential.py`. Viz: `viz_grid.py`, `viz_dropped.py`, `make_eda.py`.
+
+## Update 06 (2026-09-05): EDA visuals corrected - anomaly-geometry claims refuted, type signal is in the NORMAL data
+
+Building anomaly-type EDA figures surfaced two claims that FAIL a direct data check; both are dropped.
+
+1. **"Anisotropic anomalies sit OFF the correlation line" - REFUTED.** `probe_offline.py`: for the
+   top-25 anisotropic (local-family, high corr_str) datasets, the anomalies' median perpendicular
+   residual off the normals' correlation axis, over the normals' 95th percentile, is <1.0 for EVERY
+   dataset (max 0.78). Hard anomalies RESPECT the correlations; there is no dependency-violation
+   signature. The retired `FIG_mechanism.png` asserted the opposite and was wrong.
+
+2. **"Anisotropic anomalies need a joint view (multivariate >> marginal)" - REFUTED.**
+   `probe_margjoint.py` (STREAM_MARGJOINT.csv, n=52 with clean family + enough hardened anoms):
+   best-single-feature (oracle) AUC vs best unsupervised multivariate detector AUC gives NEGATIVE
+   joint gain for both families (local -0.036, global -0.089), and the family difference is NS
+   (MWU p=0.11). An oracle single feature separates as well or better than the multivariate detectors
+   for both types.
+
+3. **Unsupervised 2D embeddings do not separate hard anomalies.** `eda_embed_explore.py`: PCA, t-SNE,
+   and UMAP (joint-embedded normals+anoms) all leave the hardened anomalies scattered through the
+   normals. These anomalies are near-normal by construction; any 2D view that made them "pop" would be
+   an artifact. Retired the PCA anomaly-scatter column accordingly.
+
+**What IS supported (kept, `eda_type.py` -> `FIG_type_separation.png`).** The dataset-type signal lives
+in the NORMAL-data structure, not in an anomaly-geometry picture. Label-free anisotropy stats separate
+the winning detector family at AUC ~0.65-0.67 on the 173-set (top1_var 0.666, corr_str 0.665, eigengap
+0.659, eff_dim 0.650; all measure the same anisotropy). Correction to earlier notes: the raw-stat
+corr_str family-AUC is **0.665**, not 0.73 (the 0.73 was a probe/routing signal on a different subset).
+The figure: (left) normal-data eigenvalue spectra of illustrative tabular+TS exemplars, steep
+(anisotropic->local) vs flat (isotropic->global); (right) all 173 datasets in top1_var x eff_dim,
+colored by winning family, exemplars starred, AUC annotated with an honest "families overlap" caveat.
+The anomaly-TYPE consequence remains a downstream leaderboard result (SPARC routing), not a scatter.
+
+Retired: `eda_mechanism.py`/`FIG_mechanism.png` (refuted claim), `eda_spectrum.py`/`FIG_spectrum_eda.png`
+(flagged PCA anomaly scatter; spectra now in FIG_type_separation). Diagnostics kept: `probe_offline.py`,
+`probe_margvsjoint.py`, `STREAM_MARGJOINT.csv`, `eda_embed_explore.py`.
