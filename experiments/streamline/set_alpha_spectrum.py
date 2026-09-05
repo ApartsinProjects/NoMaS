@@ -40,6 +40,14 @@ cs = np.array([r["corr_str"] for r in recs]); rank = cs.argsort().argsort() / ma
 a_cs = [int(round(rk * (len(ALPHAS) - 1))) for rk in rank]
 # corr_str binary route: above median -> local pick (alpha=1), else global (alpha=0)
 med = np.nanmedian(cs); a_bin = [len(ALPHAS) - 1 if r["corr_str"] > med else 0 for r in recs]
+# JOINT continuous alpha: z(corr_str) + z(local_ev) -> rank -> grid alpha
+levs = np.array([r["lev"] for r in recs]); zc = np.nan_to_num((cs - np.nanmean(cs)) / (np.nanstd(cs) + 1e-9)); zl = (levs - levs.mean()) / (levs.std() + 1e-9)
+joint = zc + zl; jrank = joint.argsort().argsort() / max(n - 1, 1); a_joint = [int(round(rk * (len(ALPHAS) - 1))) for rk in jrank]
+# JOINT LOO on [corr_str, local_ev] only
+Xj = np.nan_to_num(np.column_stack([cs, levs])); Xj = (Xj - Xj.mean(0)) / (Xj.std(0) + 1e-9)
+loo_j = np.zeros(n, int)
+for tr, te in LeaveOneOut().split(Xj):
+    rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(Xj[tr], np.array([r["oai"] for r in recs])[tr]); loo_j[te[0]] = int(np.clip(round(rf.predict(Xj[te])[0]), 0, len(ALPHAS) - 1))
 # LOO learned map from spectrum feats -> oracle alpha index
 Xf = np.array([[r["corr_str"], r["top1_var"], r["eff_dim"], r["eigengap"], r["silh"], r["lev"]] for r in recs])
 Xf = np.nan_to_num((Xf - np.nanmean(Xf, 0)) / (np.nanstd(Xf, 0) + 1e-9)); yA = np.array([r["oai"] for r in recs])
@@ -52,6 +60,8 @@ def ev(nm, aidx):
     regs = [reg(recs[i], aidx[i]) for i in range(n)]; print(f"  {nm:28s} {np.mean(regs):6.3f} {macro(regs):6.3f}")
 ev("binary matched (local_ev)", [len(ALPHAS) - 1 if r["lev"] > TAU else 0 for r in recs])
 ev("alpha-from-corr_str (rank)", a_cs)
+ev("JOINT alpha cs+lev (rank)", a_joint)
+ev("JOINT LOO (cs,lev)", list(loo_j))
 ev("corr_str binary route", a_bin)
 ev("LOO learned (spectrum feats)", list(loo))
 ev("best-alpha ORACLE", [r["oai"] for r in recs])

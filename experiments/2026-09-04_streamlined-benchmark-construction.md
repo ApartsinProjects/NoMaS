@@ -7,6 +7,27 @@ paper's PRIMARY benchmark.** The earlier 199-dataset build is retained as the pr
 (the headline - NoMaS beats the UOMS field incl. EM/MV/IFOREST-R - reproduces on both, so the result is
 not a filtering artifact). All code + result CSVs live in `experiments/streamline/`.
 
+## Naming & terminology (STANDARDIZED 2026-09-05 - use these in the paper)
+
+**Method: SPARC** = Synthetic-Probe Anomaly-detector Routing by Correlation-spectrum. Selects a detector
+label-free by (a) probing detectors with synthetic anomalies (local-type beta=+1 / global-type beta=-4,
+graded by separation **ap_norm** vs val normals - the AP-probe beats the AUC-probe on the routed selectors,
+matched 0.137->0.128 / combined 0.129->0.126 macro on the classical pool; use AP), (b) measuring the normal
+data's correlation spectrum, and (c)
+routing to the local-best detector if the spectrum is anisotropic OR local_ev is high, else the global-best.
+Configs: SPARC-beta1 (fixed local probe), SPARC-matched (route by local_ev), SPARC-corr (route by corr_str),
+SPARC-combined (route by corr_str OR local_ev, the headline).
+
+**The routing axis is a DATASET property, NOT an anomaly-type label (we never observe anomalies at selection
+time).** Name it by the measurable normal-data geometry: **ANISOTROPIC <-> ISOTROPIC** (variance concentrated
+in a few correlated directions / thin manifold  <->  spread evenly / round ball). Measured label-free by
+corr_str (mean|correlation|, AUC 0.73 for the family), eff_dim (participation dim: local 4.5 vs global 9.1),
+top1_var. This is a CAUSAL CHAIN, only the first link observable: (1) dataset ANISOTROPIC vs ISOTROPIC ->
+(2) which DETECTOR FAMILY wins: LOCAL (neighbor: LOF/KNN/CBLOF) vs GLOBAL (marginal: HBOS/COPOD/ECOD/PCA)
+[keep local/global - standard detector terms] -> (3) the likely ANOMALY TYPE: DEPENDENCY/joint vs MARGINAL
+[a consequence, never observed; use only when explaining the mechanism]. So: axis = anisotropic/isotropic
+(dataset), families = local/global (detectors), anomaly type = dependency/marginal (mechanism only).
+
 ## Update 2026-09-05: Stage 0 point-anomaly filter, richer metrics, deep detectors, alpha spectrum
 
 **Stage 0 (NEW) - drop point/short-anomaly TS series.** A series whose anomaly content is <50% in
