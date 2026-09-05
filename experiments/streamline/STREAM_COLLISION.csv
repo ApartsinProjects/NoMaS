@@ -1,0 +1,13 @@
+dataset,corpus,n_hard,med_anom_to_normal/normal_scale,frac_within_normal_scale,frac_within_0.1scale,exact_dup_frac,reg_mv
+ProtestViolence,oddbench,2041,3.75,0.1,0.03,0.003,0.0
+SpectralImaging,ovrbench,3567,1.51,0.06,0.0,0.0,0.01
+MalariaDetection,ovrbench,1085,0.3,0.85,0.23,0.035,0.19
+XSSDetection,ovrbench,5125,1.65,0.22,0.0,0.0,0.06
+visualizing_soil,ovrbench,234,4.94,0.03,0.0,0.0,0.0
+SpamBase,dami,1679,2.76,0.08,0.0,0.0,0.0
+EmailSpamDetection,oddbench,290,1.76,0.08,0.0,0.0,0.0
+35_SpamBase,adbench,1679,2.76,0.08,0.0,0.0,0.0
+thyroid-ann,ovrbench,106,2.52,0.0,0.0,0.0,0.03
+UserMovieInteractions,ovrbench,5131,1.0,0.51,0.0,0.0,0.15
+volkert,ovrbench,430,1.35,0.03,0.0,0.0,0.11
+BreastCancer,ovrbench,488,1.23,0.34,0.02,0.018,0.0

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """DEFINITIVE streamlined pipeline (two-stage linear hardening locked in). From source, detector-free.
+  Stage 0  (TS) drop point/short-anomaly series: <50% of anomaly points in segments >= W/2, so
+           W-windowing yields only diluted labels (e.g. point-anomaly CreditCard, short-anomaly GECCO)
   Stage 1  drop dataset if hardening rule catches >= TRIV1 of anomalies (OR-solvable)
   Stage 2a harden: original-feature OR (tail + interior-gap histogram) at 5% FP
   Stage 2b harden: PCA-whitened OR (tail + interior-gap histogram) at 5% FP  [union with 2a]
@@ -22,7 +24,16 @@ from adrank.ts import _window_features, _window_labels
 from hadb_ts_mts import mts_window_features, window_labels as mts_wlabels, load_mts
 CSVMAP = {"oddbench": "hadb_oddbench.csv", "ovrbench": "hadb_ovrbench.csv", "ucr": "hadb_ts_ucr.csv", "tsbad_u": "hadb_ts_tsbad.csv"}
 ZIPS = {"ucr": "ucr/UCR_TimeSeriesAnomalyDatasets2021.zip", "tsbad_u": "tsbad/TSB-AD-U.zip"}
-Q = 0.05; TRIV1 = 0.90; MIN_HARD = 100; MIN_NORM = 800; MAX_MTS = 200
+Q = 0.05; TRIV1 = 0.90; MIN_HARD = 100; MIN_NORM = 800; MAX_MTS = 200; HALF_W = W // 2
+POINT_ANOM = {}
+def is_point_anom(lab):
+    """Stage 0 (TS only): a series is a POINT/SHORT-anomaly if < 50% of its anomaly points lie in
+    contiguous segments >= W/2 raw steps. Then no window can be majority-anomaly, so W-windowing yields
+    only diluted (near-normal) 'anomaly' labels -> exclude the series before windowing. Detector-free."""
+    lab = np.asarray(lab, int).ravel(); d = np.diff(np.r_[0, lab, 0])
+    seg = np.where(d == -1)[0] - np.where(d == 1)[0]
+    if seg.sum() == 0: return True
+    return bool((seg[seg >= HALF_W].sum() / seg.sum()) < 0.5)
 _Z = {}
 def zf(p):
     if p not in _Z: _Z[p] = zipfile.ZipFile(os.path.join(ROOT, "data", p))
@@ -82,6 +93,7 @@ def get_split(corp, name, how):
     if how == "mts":
         Xc, lab = MTS[name]
         if len(Xc) < W + 10: return None
+        POINT_ANOM[(corp, name)] = is_point_anom(lab)
         Xw, st = mts_window_features(Xc); yw = mts_wlabels(lab, st); Xw = np.nan_to_num(Xw)
         pos = np.arange(len(Xw)); tr, va, te = block_split3(yw, pos, 0)
         return Xw[tr][yw[tr] == 0], Xw[te][yw[te] == 0], Xw[yw == 1]
@@ -93,6 +105,7 @@ def get_split(corp, name, how):
         m = re.search(r"_(\d+)_(\d+)_(\d+)\.txt$", fn); x = np.array([float(v) for v in z.read(fn).decode("utf-8", "replace").split() if v.strip()]); a0, a1 = int(m.group(2)), int(m.group(3)); lab = np.zeros(len(x), int); lab[a0:min(a1 + 1, len(x))] = 1
     if len(x) > MAX_LEN:
         a = np.where(lab == 1)[0]; c = int((a[0] + a[-1]) // 2) if len(a) else MAX_LEN // 2; lo = max(0, min(c - MAX_LEN // 2, len(x) - MAX_LEN)); x, lab = x[lo:lo + MAX_LEN], lab[lo:lo + MAX_LEN]
+    POINT_ANOM[(corp, name)] = is_point_anom(lab)
     Xw, _ = _window_features(x, w=W, stride=STRIDE); st = np.arange(0, len(x) - W + 1, STRIDE); yw = _window_labels(lab, st, w=W, min_count=1); Xw = np.nan_to_num(Xw)
     pos = np.arange(len(Xw)); tr, va, te = block_split3(yw, pos, 0)
     return Xw[tr][yw[tr] == 0], Xw[te][yw[te] == 0], Xw[yw == 1]
@@ -112,11 +125,12 @@ for corp, name, how in sources():
     ne = n_eff(Xtr, hard) if len(hard) >= 5 else len(hard)
     rows.append({"corpus": corp, "dataset": str(name)[:40], "n_norm": len(Xhold), "n_anom": len(Xa),
                  "n_hard": int((~triv).sum()), "frac_triv": float(triv.mean()), "n_eff": int(ne),
-                 "fp": fingerprint(Xtr, Xhold)})
+                 "point_anom": bool(POINT_ANOM.get((corp, name), False)), "fp": fingerprint(Xtr, Xhold)})
 df = pd.DataFrame(rows); df.to_csv(os.path.join(OUT, "STREAM_FINAL2_ALL.csv"), index=False)
-s1 = df[df.frac_triv < TRIV1]; s5 = s1[s1.n_norm >= MIN_NORM]; s3 = s5[s5.n_eff >= MIN_HARD]
+s0 = df[~df.point_anom]; s1 = s0[s0.frac_triv < TRIV1]; s5 = s1[s1.n_norm >= MIN_NORM]; s3 = s5[s5.n_eff >= MIN_HARD]
 s4 = s3.sort_values("n_eff", ascending=False).drop_duplicates("fp"); s4.to_csv(os.path.join(OUT, "STREAM_FINAL2_SET.csv"), index=False)
 print(f"=== DEFINITIVE pipeline (two-stage linear hardening) - {len(df)} loaded candidates ===")
+print(f"  S0 drop point/short-anomaly TS: {len(df)-len(s0)}  -> {list(df[df.point_anom].dataset)}")
 print(f"  S1 keep frac_triv<{TRIV1}:   {len(s1)}")
 print(f"  S5 keep n_norm>={MIN_NORM}:      {len(s5)}")
 print(f"  S3 keep n_eff>={MIN_HARD}:       {len(s3)}")

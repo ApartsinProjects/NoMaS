@@ -1,0 +1,16 @@
+dataset,d,oracle_ap,best_1feat_ap,gap,reg_matched,reg_mv
+ProtestViolence,7,0.78,0.71,0.06,0.87,0.0
+SpectralImaging,60,0.84,0.75,0.08,0.78,0.01
+MalariaDetection,5,0.69,0.75,-0.05,0.83,0.19
+XSSDetection,56,0.47,0.8,-0.33,0.66,0.06
+visualizing_soil,3,0.84,0.29,0.55,0.58,0.0
+SpamBase,57,0.74,0.54,0.2,0.53,0.0
+EmailSpamDetection,72,0.62,0.63,-0.01,0.51,0.0
+35_SpamBase,57,0.73,0.54,0.19,0.49,0.0
+173_GECCO_id_1_Sensor_,72,0.89,0.68,0.21,0.63,0.17
+thyroid-ann,6,0.29,0.7,-0.41,0.28,0.03
+137_CreditCard_id_1_Fi,232,0.36,0.76,-0.4,0.29,0.09
+UserMovieInteractions,17,0.21,0.34,-0.13,0.34,0.15
+volkert,147,0.76,0.7,0.05,0.27,0.11
+BreastCancer,4,0.15,0.08,0.07,0.13,0.0
+WindowsEditionAnomaly,26,0.58,0.92,-0.34,0.51,0.4

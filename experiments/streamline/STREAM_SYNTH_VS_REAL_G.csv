@@ -1,0 +1,16 @@
+dataset,d,reg_matched,reg_mv,real_top1share,synth_top1share,real_efffeats,synth_efffeats,real_nx,synth_nx
+ProtestViolence,7,0.87,0.0,0.68,0.33,2.0,4.0,0.7,0.4
+SpectralImaging,60,0.78,0.01,0.21,0.33,8.0,6.1,8.2,4.5
+MalariaDetection,5,0.83,0.19,0.91,0.28,1.2,4.5,0.9,0.3
+XSSDetection,56,0.66,0.06,0.33,0.2,5.5,8.4,1.7,4.8
+visualizing_soil,3,0.58,0.0,0.68,0.44,1.9,2.5,0.3,0.1
+SpamBase,57,0.53,0.0,0.17,0.19,13.0,10.2,3.9,9.1
+EmailSpamDetection,72,0.51,0.0,0.46,0.17,4.2,11.5,8.8,13.1
+35_SpamBase,57,0.49,0.0,0.17,0.14,12.9,11.6,3.9,8.7
+173_GECCO_id_1_Sensor_,72,0.63,0.17,0.29,0.25,5.7,6.4,14.4,14.2
+thyroid-ann,6,0.28,0.03,0.83,0.33,1.4,4.2,0.6,1.4
+137_CreditCard_id_1_Fi,232,0.29,0.09,0.45,0.35,4.5,5.0,29.3,61.7
+UserMovieInteractions,17,0.34,0.15,0.21,0.44,9.8,4.1,0.7,1.7
+volkert,147,0.27,0.11,0.09,0.24,24.2,10.6,25.5,31.4
+BreastCancer,4,0.13,0.0,0.3,0.29,3.9,3.9,0.3,0.6
+WindowsEditionAnomaly,26,0.51,0.4,0.91,0.26,1.2,5.8,3.1,2.8
