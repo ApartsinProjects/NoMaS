@@ -55,12 +55,13 @@ def get3(corp, name):
 mine = pd.read_csv(os.path.join(D, "STREAM_MINE.csv"))
 aniso = mine[mine.fam == "local"].sort_values("corr_str", ascending=False)
 iso = mine[mine.fam == "global"].sort_values("corr_str")
+NPC = 15  # common x-axis: first NPC components for every panel
 def pick(cand, k=2):
     out = []
     for _, r in cand.iterrows():
         try: Xtr, Xval, Xtn, Xa = get3(r.corpus, r.dataset)
         except Exception: continue
-        if Xtr.shape[1] < 3 or len(Xtr) < 60 or len(Xa) < 15: continue
+        if not (NPC <= Xtr.shape[1] <= 60) or len(Xtr) < 60 or len(Xa) < 15: continue   # comparable dimensionality
         Xh = harden(Xtr, np.vstack([Xval, Xtn]), Xa)
         if len(Xh) < 20: continue
         out.append((r.corpus, r.dataset, r.corr_str, r.eff_dim, Xtr, Xh))
@@ -73,8 +74,8 @@ fig, axes = plt.subplots(len(rows), 2, figsize=(11, 3.1 * len(rows)))
 for i, (corp, name, cs, ed, Xtr, Xh) in enumerate(rows):
     sc = StandardScaler().fit(Xtr); Ztr = sc.transform(Xtr); pca = PCA().fit(Ztr); ev = pca.explained_variance_ratio_
     col = "#2a9d8f" if i < 2 else "#e76f51"; tag = "ANISOTROPIC" if i < 2 else "ISOTROPIC"
-    axs = axes[i, 0]; kk = min(15, len(ev)); axs.bar(range(1, kk + 1), ev[:kk], color=col)
-    axs.set_title(f"[{tag}]  {name[:22]} \u2014 {'STEEP' if i<2 else 'FLAT'} spectrum", fontsize=9, color=col, fontweight="bold"); axs.set_xlabel("principal component"); axs.set_ylabel("variance frac"); axs.set_ylim(0, max(ev[0] * 1.1, 0.1))
+    axs = axes[i, 0]; axs.bar(range(1, NPC + 1), ev[:NPC], color=col)
+    axs.set_title(f"[{tag}]  {name[:22]} \u2014 {'STEEP' if i<2 else 'FLAT'} spectrum", fontsize=9, color=col, fontweight="bold"); axs.set_xlabel("principal component (1-15)"); axs.set_ylabel("variance frac"); axs.set_ylim(0, 0.8); axs.set_xlim(0.3, NPC + 0.7)
     axs.text(0.97, 0.9, f"corr_str={cs:.2f}\neff_dim={ed:.1f}", transform=axs.transAxes, ha="right", va="top", fontsize=8.5, bbox=dict(fc="white", ec=col, alpha=.85))
     axc = axes[i, 1]; P2 = PCA(2, random_state=0).fit(Ztr); Pn = P2.transform(Ztr); Ph = P2.transform(sc.transform(Xh))
     rng = np.random.default_rng(0); Pn = Pn if len(Pn) <= 1200 else Pn[rng.choice(len(Pn), 1200, replace=False)]
