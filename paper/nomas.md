@@ -25,8 +25,9 @@ We rebuild the measurement. ADReal is a benchmark of 173 tabular and multivariat
 Our contributions:
 
 1. **ADReal**, a contamination-controlled benchmark for evaluating unsupervised model selection in anomaly detection, produced by a detector-free and reproducible pipeline whose five construction rules remove trivial and mislabeled anomalies, close train/test leakage, fix one metric, deduplicate anomalies, and impose paired significance.
-2. An **evaluation of classical and deep detectors and eight selection methods under a leakage-free protocol**, showing that widely-cited agreement selectors (consensus, model-centrality, HITS, IREOS) degenerate to random when the leak is closed and selection sees normals only, while entropy and mass-volume survive.
-3. **SPARC**, a structure-aware selector that routes between local and global detector families using a measurable, label-free anisotropy property of the normal data, and is the only method that significantly beats both surviving baselines (family-balanced regret 0.156; $p = 0.021$ versus majority vote, $p = 0.036$ versus entropy).
+2. **An evaluation of roughly thirty classical and deep anomaly detectors** on ADReal, spanning isolation, density, distribution, and projection families together with deep one-class, reconstruction, and raw-sequence time-series models, which establishes the per-task oracle-best detector and the local/global family structure that selection is measured against.
+3. **An evaluation of eight unsupervised selection methods under the leakage-free protocol**, showing that widely-cited agreement selectors (consensus, model-centrality, HITS, IREOS) degenerate to random when the leak is closed and selection sees normals only, while entropy and mass-volume survive.
+4. **SPARC**, a structure-aware selector that routes between local and global detector families using a measurable, label-free anisotropy property of the normal data, and is the only method that significantly beats both surviving baselines (family-balanced regret 0.156; $p = 0.021$ versus majority vote, $p = 0.036$ versus entropy).
 
 ## 2. Related work
 
