@@ -86,14 +86,9 @@ KATEX = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.
   onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\(',right:'\\\\)',display:false},{left:'\\\\[',right:'\\\\]',display:true}]});"></script>"""
 
 
-DOCXLINKS = """<div class="docxlinks">
-<a class="docxlink" href="nomas.pdf" download>&#8595; PDF (1-col)</a>
-<a class="docxlink" href="nomas-2col.pdf" download>&#8595; PDF (2-col)</a>
-<a class="docxlink" href="nomas-2col-latex.pdf" download>&#8595; PDF (2-col, LaTeX)</a>
-<a class="docxlink" href="nomas.docx" download>&#8595; Word (1-col)</a>
-<a class="docxlink" href="nomas-2col.docx" download>&#8595; Word (2-col)</a>
-</div>
-"""
+# Download badges suppressed while the ADReal draft is in progress: the nomas.* PDFs/DOCX are
+# stale (old paper) until the derived artifacts are rebuilt from this source. Restore when they are.
+DOCXLINKS = ""
 
 import re as _re
 
@@ -124,7 +119,7 @@ def build(src, out, title):
     page = (f'<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             f'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
             f'<title>{title}</title>\n{KATEX}\n<style>{STYLE}</style>\n</head>\n<body>\n'
-            f'{DOCXLINKS}{html}\n<footer>NoMaS v1 · {title}</footer>\n</body>\n</html>\n')
+            f'{DOCXLINKS}{html}\n<footer>ADReal · {title}</footer>\n</body>\n</html>\n')
     outp = Path(out)
     outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_text(page, encoding="utf-8")
