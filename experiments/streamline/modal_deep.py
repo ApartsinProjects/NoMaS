@@ -10,7 +10,7 @@ image = (
     .pip_install("numpy", "pandas", "scikit-learn", "pyod", "deepod")
 )
 data_vol = modal.Volume.from_name("adrank-bundle", create_if_missing=True)
-res_vol = modal.Volume.from_name("adrank-deep2-results", create_if_missing=True)
+res_vol = modal.Volume.from_name("adrank-deep3-results", create_if_missing=True)
 
 
 def _classical_pool():
@@ -103,28 +103,36 @@ def run_shard(keys):
         ss = StandardScaler().fit(Xtr); Ztr, Zte, Zval = ss.transform(Xtr), ss.transform(Xte), ss.transform(Xval)
         syn1, syn4 = _gen_beta(Xval, 200, 1.0), _gen_beta(Xval, 200, -4.0)
         Zs1, Zs4 = ss.transform(syn1), ss.transform(syn4)
+        rng = np.random.default_rng(0); lo, hi = Xval.min(0), Xval.max(0)
+        U = lo + rng.random((800, Xval.shape[1])) * np.where(hi > lo, hi - lo, 1.0); Zu = ss.transform(U)  # uniform for EM/MV
         y1 = np.r_[np.zeros(len(Xval)), np.ones(200)]
-        res = {"key": key, "ap": {}, "a1": {}, "a4": {}}
+        res = {"key": key, "ap": {}, "a1": {}, "a4": {}}; VAL, UNI = {}, {}
 
-        def probe(nm, sv, s1, s4, st):
+        def probe(nm, sv, s1, s4, st, su):
             if np.all(np.isfinite(st)) and np.nanstd(st) > 1e-12: res["ap"][nm] = apn(yte, st)
             if np.nanstd(np.r_[sv, s1]) > 1e-12: res["a1"][nm] = float(roc_auc_score(y1, np.r_[sv, s1]))
             if np.nanstd(np.r_[sv, s4]) > 1e-12: res["a4"][nm] = float(roc_auc_score(y1, np.r_[sv, s4]))
+            if np.all(np.isfinite(sv)) and np.all(np.isfinite(su)):
+                VAL[nm] = sv.astype("float32"); UNI[nm] = su.astype("float32")   # for UOMS (EM/MV/consensus/MC/HITS) over the full pool
         for nm, ctor in _classical_pool():
             try:
                 m = ctor(); m.fit(Xtr)
-                probe(nm, np.asarray(m.decision_function(Xval), float), np.asarray(m.decision_function(syn1), float), np.asarray(m.decision_function(syn4), float), np.asarray(m.decision_function(Xte), float))
+                probe(nm, np.asarray(m.decision_function(Xval), float), np.asarray(m.decision_function(syn1), float), np.asarray(m.decision_function(syn4), float), np.asarray(m.decision_function(Xte), float), np.asarray(m.decision_function(U), float))
             except Exception: pass
         for nm, ctor in _deep_pool(dev):
             try:
                 m = ctor()
                 with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                     m.fit(Ztr)
-                    probe(nm, np.asarray(m.decision_function(Zval), float), np.asarray(m.decision_function(Zs1), float), np.asarray(m.decision_function(Zs4), float), np.asarray(m.decision_function(Zte), float))
+                    probe(nm, np.asarray(m.decision_function(Zval), float), np.asarray(m.decision_function(Zs1), float), np.asarray(m.decision_function(Zs4), float), np.asarray(m.decision_function(Zte), float), np.asarray(m.decision_function(Zu), float))
             except Exception: pass
+        try:
+            np.savez_compressed(f"/results/sc_{key}.npz", yte=yte.astype("int8"),
+                                **{f"val__{k}": v for k, v in VAL.items()}, **{f"uni__{k}": v for k, v in UNI.items()})
+        except Exception: pass
         fo.write(json.dumps(res) + "\n"); fo.flush(); res_vol.commit()   # INCREMENTAL: one row per dataset, committed
         n_written += 1
-        print(f"  {key}: {len(res['ap'])} detectors (ap+probe)", flush=True)
+        print(f"  {key}: {len(res['ap'])} detectors (ap+probe+scores)", flush=True)
     fo.close(); res_vol.commit()
     return n_written
 
@@ -140,7 +148,7 @@ def main(shards: int = 12):
     total = 0
     for n in run_shard.map(parts):
         total += n
-    print(f"DONE: scored {total} datasets across {len(parts)} shards; results in volume adrank-deep2-results")
+    print(f"DONE: scored {total} datasets across {len(parts)} shards; results in volume adrank-deep3-results")
 
 
 @app.local_entrypoint()
@@ -150,4 +158,4 @@ def fill():
     keys = [k.strip() for k in open(os.path.join(D, "_missing.txt")) if k.strip()]
     print(f"filling {len(keys)} missing datasets")
     n = run_shard.remote(keys)
-    print(f"DONE: scored {n} datasets; results in volume adrank-deep2-results")
+    print(f"DONE: scored {n} datasets; results in volume adrank-deep3-results")

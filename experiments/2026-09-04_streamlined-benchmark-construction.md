@@ -110,6 +110,35 @@ family weakly predictable (local_ev AUC 0.79); finer best-alpha carries no geome
 few-shot blows past it (0.018). Publishable: positive method + characterized/explained open problem + few-
 shot upper bound.
 
+## Update 2026-09-05d: FINAL unified leaderboard (full classical+deep pool) + spectrum router
+
+**Local-vs-global is a SPECTRUM-SHAPE property (`mine_localglobal.py`, `STREAM_MINE.csv`, 173).** Mined ~20
+label-free normal-data stats. Strongest family discriminators: **corr_str (mean|correlation| AUC 0.73),
+top1_var (PC1 variance 0.72), eff_dim (participation dim, 0.71 for global: local 4.5 vs global 9.1),
+eigengap 0.69, silhouette 0.69**. MULTIMODALITY (void_mass/n_modes/ll_gap) all ~0.50 = NOT discriminative.
+Mechanism: LOCAL = low-dim, correlated, anisotropic (steep spectrum, thin manifold) -> off-manifold
+combination anomalies -> neighbor detectors; GLOBAL = high-dim, isotropic (flat spectrum, round ball) ->
+marginal anomalies -> histogram detectors. corr_str (0.73) is a pure normal-data stat ~matching the
+synthetic probe local_ev (0.79). Effective-dimension (participation ratio of the covariance spectrum) is
+the discriminating "dimensionality", NOT ambient d (AUC 0.46) or two-NN intrinsic manifold dim (0.48).
+
+**SPECTRUM ROUTER upgrades the method (`rank_spectrum.py` classical; `finalize_leaderboard.py` full pool).**
+Route local-vs-global by corr_str instead of / combined-with local_ev. Classical pool (construct-matched):
+**combined (corr_str OR local_ev) 0.132/0.137 macro beats MV (p=0.002) and EM (p=0.001)** and the old
+matched (0.148); corr_str-alone 0.143 also beats matched.
+
+**FINAL UNIFIED LEADERBOARD (`finalize_leaderboard.py`, `STREAM_FINAL_LEADERBOARD.csv`,
+`FIG_final_leaderboard.png`): full CLASSICAL+DEEP pool, all selectors construct-matched, 173 datasets
+(104L/69G).** Macro regret: **NoMaS combined 0.156 (micro 0.149) - beats MV p=0.021, EM p=0.036, the only
+significant winner**; NoMaS corr_str 0.168; NoMaS beta=1 0.170; EM 0.172; NoMaS matched 0.173 (old matched
+now ~ties EM on the expanded pool - the spectrum router is what restores the win); MV 0.179; UDR 0.213;
+IFOREST-R 0.218; random 0.248; HITS/consensus/MC 0.26-0.27 (below random, degenerate on normals-only val).
+Deep raises the oracle +0.038 (classical 0.290 -> combined 0.328) so all regrets grow vs the classical-pool
+table but the ranking holds. Detectors: DeepSVDD best single (0.161), classical diversity wins the oracle;
+raw-TS deep (OmniAnomaly 0.354, transformers underperform) reported as a SEPARATE MTS-modality table (TSB-AD
+native protocol, not construct-matched to the hardened tabular test). OPEN baseline: IREOS (only UOMS method
+not yet computed). Score-saving Modal harness on volume adrank-deep3-results (val+uniform per detector).
+
 ## Migration checklist (to finish promoting streamlined -> primary)
 - [x] Selection pipeline + final set (`STREAM_FINAL2_SET.csv`, 176 datasets)
 - [x] Full EDA (`STREAM_EDA2_ALL.csv`): sizes, diversity, marginal+joint multimodality, solvability, family
