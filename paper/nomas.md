@@ -1,4 +1,4 @@
-<h1>No Easy Wins: A Contamination-Controlled Benchmark for Unsupervised Model Selection in Anomaly Detection</h1>
+<h1>No Easy Wins: A Contamination-Controlled Benchmark for Evaluating Anomaly Detection and Model Selection</h1>
 
 <div class="authors">Alexander Apartsin<sup>1</sup>, Yehudit Aperstein<sup>2</sup></div>
 <div class="affil"><sup>1</sup>School of Computer Science, Faculty of Sciences, Holon Institute of Technology (HIT), Holon, Israel</div>

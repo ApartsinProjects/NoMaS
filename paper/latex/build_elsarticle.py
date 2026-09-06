@@ -98,7 +98,7 @@ def main():
         "\\address[hit]{School of Computer Science, Faculty of Sciences, Holon Institute of Technology (HIT), Holon, Israel}\n"
         "\\address[afeka]{Intelligent Systems, Afeka Academic College of Engineering, Tel-Aviv, Israel}")
     tex = tex.replace("__JOURNAL__", "Neurocomputing")
-    NEWTITLE = "No Easy Wins: A Contamination-Controlled Benchmark for Unsupervised Model Selection in Anomaly Detection"
+    NEWTITLE = "No Easy Wins: A Contamination-Controlled Benchmark for Evaluating Anomaly Detection and Model Selection"
     tex = tex.replace("\\title{" + NEWTITLE + "}",
                       "\\title{\\vspace*{-2\\baselineskip}" + NEWTITLE + "}")
 
