@@ -210,7 +210,7 @@ An anomaly a single feature or a one-line rule already isolates makes every dete
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_hist.png}
-\caption{\textbf{Figure 3.} The same effect in one dimension: along each dataset\textquotesingle s best separating direction, the removed easy anomalies (green) are cleanly separated from the normals, while the retained hard anomalies (red) overlap the normal distribution and cannot be separated by any single-feature or linear rule.}
+\caption{\textbf{Figure 3.} The same effect in one dimension: the hardening filter thresholds a multi-feature severity statistic (dashed line, the 5\% cutoff). The removed easy anomalies (green) all exceed it, while the retained hard anomalies (red) have severity like the normals and so cannot be flagged by any single feature or direction. Because the statistic aggregates all features and whitened directions, an anomaly separable on any one of them is removed even when it overlaps the normals along another.}
 \end{figure*}
 
 \subsection{No mislabeled anomalies and no leakage}\label{33-no-mislabeled-anomalies-and-no-leakage}
