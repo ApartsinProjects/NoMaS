@@ -133,11 +133,11 @@ Our contributions:
 \begin{enumerate}
 \tightlist
 \item
-  \textbf{ADReal, a dataset and evaluation protocol that makes anomaly-detection comparison reliable.} A single detector-free, reproducible pipeline removes trivial, unsolvable, and mislabeled tasks, closes train/test leakage, caps the base rate, deduplicates anomalies, and scores every method by regret against the oracle-best detector with paired significance. Because both choosing a detector for a new dataset and evaluating one are done without labels, every criterion is computed on held-out normals only, matching how these methods are used; 151 tasks survive from 173 constructed.
+  \textbf{ADReal, a dataset and a protocol for evaluating anomaly detectors.} One detector-free, reproducible pipeline removes trivial, unsolvable, and mislabeled tasks, closes train/test leakage, caps the base rate, and deduplicates anomalies, so a detector\textquotesingle s measured performance reflects skill rather than artifacts. From 173 constructed tasks, 151 survive.
 \item
-  \textbf{An evaluation of a rich set of modern detectors.} We fit roughly thirty classical and deep anomaly detectors under one consistent preprocessing, fixing the per-task oracle-best detector that defines regret.
+  \textbf{An evaluation of a rich set of modern detectors.} We fit roughly thirty classical and deep anomaly detectors under one consistent preprocessing, which gives each dataset its oracle-best detector.
 \item
-  \textbf{An evaluation of state-of-the-art unsupervised model-selection methods.} Under the leakage-free protocol, the widely-cited agreement selectors (consensus, model-centrality, HITS) fall below a random pick, and only entropy and mass-volume survive, reversing their apparent lead under transductive evaluation.
+  \textbf{A protocol for evaluating unsupervised model selection, and an evaluation of the state of the art under it.} Beyond a detector\textquotesingle s general performance, practice needs the best detector for a specific dataset given only its normal data, a different question. We score a selection method by its regret against the oracle-best detector, with its criterion computed on held-out normals only, and find that under this leakage-free protocol the agreement selectors (consensus, model-centrality, HITS) fall below a random pick while only entropy and mass-volume survive, reversing their apparent lead under transductive evaluation.
 \item
   \textbf{SPARC, a model-selection method that beats the survivors.} SPARC builds synthetic anomalies from the normal data and grades detectors on how well they find them, and is the only method that significantly beats both entropy and mass-volume (regret 0.124; \(p<0.001\) against each), decisively on time series and holding on tabular data.
 \end{enumerate}
