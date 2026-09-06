@@ -60,7 +60,18 @@ ADReal is produced by a single pipeline that never consults an anomaly detector 
 
 ### 3.1 Data sources
 
-ADReal draws from two modalities. Tabular tasks come from ADBench [5], the DAMI collection [16], and the OddBench (real-world semantic-anomaly tables) and OvrBench (one-vs-rest conversions of classification data) collections of MacrOData [20]; multivariate time-series tasks come from TSB-AD [19], windowed into fixed-length feature vectors. A curation stage selects usable source datasets, windows the series, and applies single-feature and permutation triviality pre-filters and a window-purity filter, leaving 174 candidate tasks that enter the pipeline of Figure 1. The final benchmark spans 151 tasks: 66 from OvrBench, 39 from OddBench, 38 time series, 5 from ADBench, and 3 from DAMI.
+ADReal draws from two modalities. Tabular tasks come from ADBench [5], the DAMI collection [16], and the OddBench (real-world semantic-anomaly tables) and OvrBench (one-vs-rest conversions of classification data) collections of MacrOData [20]; multivariate time-series tasks come from TSB-AD [19], windowed into fixed-length feature vectors. A curation stage selects usable source datasets, windows the series, and applies single-feature and permutation triviality pre-filters and a window-purity filter, leaving 174 candidate tasks that enter the pipeline of Figure 1. Table 1 traces the provenance: from the datasets available in each source, how many became candidate tasks and how many survive all contamination controls into the final 151.
+
+**Table 1.** Provenance of the ADReal benchmark: datasets available in each source, the number selected as candidate tasks by curation, and the number surviving into the benchmark.
+
+| Source | Modality | Available | Candidate | In bench. |
+|---|---|---:|---:|---:|
+| OvrBench | tabular | 754 | 76 | 66 |
+| OddBench | tabular | 187 | 46 | 39 |
+| TSB-AD | time series | 200 | 41 | 38 |
+| ADBench | tabular | 35 | 7 | 5 |
+| DAMI | tabular | 16 | 4 | 3 |
+| **Total** | | **1,192** | **174** | **151** |
 
 ### 3.2 No trivially separable and no unsolvable anomalies
 
@@ -90,14 +101,14 @@ Repeated near-identical anomalies inflate whichever detector happens to catch th
 
 ### 3.6 What the benchmark looks like
 
-The 151 tasks are not uniform, and the two modalities differ in ways that matter for both detection and selection (Figure 4, Table 1). Tabular tasks range from 2 to over 300 features and sit near the base-rate cap, with a median test anomaly fraction of 0.43; their oracle detector is comparatively strong (median $\mathrm{ap\_norm}$ 0.30). Time-series window features are higher-dimensional (median 16, up to 408), have a much lower prevalence (median 0.15), and are harder: the oracle detector reaches a median $\mathrm{ap\_norm}$ of only 0.19. This spread is deliberate. The contamination controls remove the tasks on which selection would be meaningless, but leave a benchmark that is genuinely difficult, with an oracle far from perfect on most tasks, which is the regime in which a selection method's choice actually matters.
+The 151 tasks are not uniform, and the two modalities differ in ways that matter for both detection and selection (Figure 4, Table 2). Tabular tasks range from 2 to over 300 features and sit near the base-rate cap, with a median test anomaly fraction of 0.43; their oracle detector is comparatively strong (median $\mathrm{ap\_norm}$ 0.30). Time-series window features are higher-dimensional (median 16, up to 408), have a much lower prevalence (median 0.15), and are harder: the oracle detector reaches a median $\mathrm{ap\_norm}$ of only 0.19. This spread is deliberate. The contamination controls remove the tasks on which selection would be meaningless, but leave a benchmark that is genuinely difficult, with an oracle far from perfect on most tasks, which is the regime in which a selection method's choice actually matters.
 
 <figure>
 <img src="figures/fig_eda.png" alt="Three histograms over the 151 datasets, tabular versus time series: dimensionality on a log scale, test anomaly fraction, and oracle detector base-rate-normalized average precision. Tabular datasets span a wide dimensionality and cluster at the 0.5 base-rate cap with higher oracle scores; time-series datasets are higher-dimensional, lower-prevalence, and harder.">
 <figcaption><b>Figure 4.</b> Characteristics of the 151 ADReal datasets, split by modality: dimensionality (log scale), test anomaly fraction (dashed line marks the base-rate cap at 0.5), and the difficulty of each task measured by its oracle-best detector. Time-series tasks are higher-dimensional, lower-prevalence, and harder than the tabular tasks.</figcaption>
 </figure>
 
-**Table 1.** The 151 ADReal tasks by source: modality, number of tasks, and the median dimensionality, test anomaly fraction, and oracle-best detector $\mathrm{ap\_norm}$.
+**Table 2.** The 151 ADReal tasks by source: modality, number of tasks, and the median dimensionality, test anomaly fraction, and oracle-best detector $\mathrm{ap\_norm}$.
 
 | Source | Tasks | Dim (med.) | Anomaly frac. (med.) | Oracle ap\_norm (med.) |
 |---|---:|---:|---:|---:|
@@ -109,9 +120,9 @@ The 151 tasks are not uniform, and the two modalities differ in ways that matter
 
 ## 4. Detectors and their evaluation
 
-**Detector pool.** A selection method chooses from a fixed pool of 32 detectors that spans the classical families and a set of deep one-class and reconstruction models (Table 2). The classical part is the standard PyOD [6] set: Isolation Forest [8], LOF [9], KNN, ECOD [12], COPOD [11], HBOS, PCA, CBLOF, and LODA [13]. For the four algorithms whose single most influential hyperparameter drives their behavior, the pool sweeps a small grid of that hyperparameter rather than one default, so selection includes hyperparameter choice and not only algorithm choice: neighborhood size for LOF and KNN, histogram bins for HBOS, and retained variance for PCA. The deep part adds one detector each of DeepSVDD [14], an autoencoder, a variational autoencoder, internal contrastive learning [37], deep isolation, robust collaborative autoencoding, and scale learning [38]. Every detector, classical and deep, is fit on the train normals and scored on the same standardized features, so no detector is handicapped by a preprocessing inconsistency; the oracle-best detector per task defines the zero of regret.
+**Detector pool.** A selection method chooses from a fixed pool of 32 detectors that spans the classical families and a set of deep one-class and reconstruction models (Table 3). The classical part is the standard PyOD [6] set: Isolation Forest [8], LOF [9], KNN, ECOD [12], COPOD [11], HBOS, PCA, CBLOF, and LODA [13]. For the four algorithms whose single most influential hyperparameter drives their behavior, the pool sweeps a small grid of that hyperparameter rather than one default, so selection includes hyperparameter choice and not only algorithm choice: neighborhood size for LOF and KNN, histogram bins for HBOS, and retained variance for PCA. The deep part adds one detector each of DeepSVDD [14], an autoencoder, a variational autoencoder, internal contrastive learning [37], deep isolation, robust collaborative autoencoding, and scale learning [38]. Every detector, classical and deep, is fit on the train normals and scored on the same standardized features, so no detector is handicapped by a preprocessing inconsistency; the oracle-best detector per task defines the zero of regret.
 
-**Table 2.** The 32-detector pool. For the four classical algorithms most sensitive to one hyperparameter, the pool sweeps a grid of that hyperparameter, so a selection method chooses configuration as well as algorithm.
+**Table 3.** The 32-detector pool. For the four classical algorithms most sensitive to one hyperparameter, the pool sweeps a grid of that hyperparameter, so a selection method chooses configuration as well as algorithm.
 
 | Detector | Family | Hyperparameter swept | Variants |
 |---|---|---|---:|
@@ -131,9 +142,9 @@ The 151 tasks are not uniform, and the two modalities differ in ways that matter
 <figcaption><b>Figure 5.</b> Detector evaluation on the 151-dataset ADReal benchmark: mean base-rate-normalized average precision per detector (higher is better), colored by family, with the number of datasets on which each detector is the oracle-best. Neighbor and density detectors lead; classical detectors supply the oracle on 78% of datasets, and the deep pool adds only 0.021 to the average oracle.</figcaption>
 </figure>
 
-Grouping detectors by family (Table 3) shows why no family is dispensable and why a family's average is a poor guide to when it wins. The neighbor and density family supplies almost half of all per-dataset oracles. The distribution family has a low average yet supplies the oracle on nearly a quarter of datasets, because a few of its members win outright on specific datasets; the isolation family has a respectable average but is never the single best.
+Grouping detectors by family (Table 4) shows why no family is dispensable and why a family's average is a poor guide to when it wins. The neighbor and density family supplies almost half of all per-dataset oracles. The distribution family has a low average yet supplies the oracle on nearly a quarter of datasets, because a few of its members win outright on specific datasets; the isolation family has a respectable average but is never the single best.
 
-**Table 3.** Detector families on the 151-dataset ADReal benchmark: number of detectors in the pool, the share of datasets on which the family supplies the oracle-best detector, and the family's mean base-rate-normalized average precision (ap\_norm).
+**Table 4.** Detector families on the 151-dataset ADReal benchmark: number of detectors in the pool, the share of datasets on which the family supplies the oracle-best detector, and the family's mean base-rate-normalized average precision (ap\_norm).
 
 | Family | Detectors | Oracle-best share | Mean ap\_norm |
 |---|---:|---:|---:|
@@ -156,9 +167,9 @@ Grouping detectors by family (Table 3) shows why no family is dispensable and wh
 <figcaption><b>Figure 6.</b> Model-selection regret on the 151-task ADReal benchmark (base-rate-normalized average precision; lower is better). The dashed line is the best fixed detector (LOF, $k=10$, no per-task selection), the bar every selection method must beat; the dotted line is a random pick. SPARC is the only method that significantly beats the fixed detector; Goswami's injection selector matches it; entropy and mass-volume fall short of it; the agreement selectors fall below random.</figcaption>
 </figure>
 
-**Selection helps only where no detector is near-universal.** Breaking regret down by modality (Table 4) locates where selection adds value over the fixed detector. On time series and OvrBench a single neighbor detector is already near the oracle (fixed-detector regret 0.038 and 0.145), and no method meaningfully beats it. Selection earns its keep on OddBench, where the oracle detector varies from dataset to dataset: there SPARC reaches 0.153 against the fixed detector's 0.198 ($p=0.029$) and entropy's 0.193. The agreement selectors collapse on both tabular collections (0.25 to 0.27) and only sit near random on time series, while entropy trails badly on time series (0.155), where a neighbor detector is near-oracle.
+**Selection helps only where no detector is near-universal.** Breaking regret down by modality (Table 5) locates where selection adds value over the fixed detector. On time series and OvrBench a single neighbor detector is already near the oracle (fixed-detector regret 0.038 and 0.145), and no method meaningfully beats it. Selection earns its keep on OddBench, where the oracle detector varies from dataset to dataset: there SPARC reaches 0.153 against the fixed detector's 0.198 ($p=0.029$) and entropy's 0.193. The agreement selectors collapse on both tabular collections (0.25 to 0.27) and only sit near random on time series, while entropy trails badly on time series (0.155), where a neighbor detector is near-oracle.
 
-**Table 4.** Selection regret (lower is better) by modality, with the best-fixed-detector and random references. Selection beats the fixed detector only on OddBench; the agreement selectors collapse on the tabular collections.
+**Table 5.** Selection regret (lower is better) by modality, with the best-fixed-detector and random references. Selection beats the fixed detector only on OddBench; the agreement selectors collapse on the tabular collections.
 
 | Selector | All (151) | Time series (38) | OddBench (39) | OvrBench (66) |
 |---|---:|---:|---:|---:|
@@ -176,17 +187,16 @@ Grouping detectors by family (Table 3) shows why no family is dispensable and wh
 
 **The probe.** From the validation normals, SPARC builds one kind of synthetic anomaly. For each normal point it resamples a random subset, about 40%, of its features, drawing each from that feature's own observed values, so every coordinate stays a value the data actually takes while the combination violates the normal joint structure [36]. This is the feature-corruption operator of self-supervised tabular learning (SCARF [39], VIME [40]), here repurposed not to train a detector but to grade one: a detector that separates these dependency-violating points from the normals is sensitive to exactly the local, joint structure that real anomalies inhabit. Each detector is graded by how well its scores separate the probe from the normals, and the highest-graded detector is SPARC's choice.
 
-**Candidates, and what SPARC is not.** Deep detectors tend to overfit the synthetic probe, separating its extremes without generalizing to real anomalies, so SPARC selects among the classical detectors while the pool and the oracle still include the deep detectors. That is the whole method: one probe, one grade per detector, an argmax. SPARC has no routing, no second probe, and no tuned thresholds; its only parameter is the resample fraction. An earlier version added a second, marginal probe and a per-task router that chose between the two; both proved unnecessary, since the single dependency probe alone matches the routed combination (Table 5).
+**Candidates.** Deep detectors tend to overfit the synthetic probe, separating its extremes without generalizing to real anomalies, so SPARC selects among the classical detectors while the pool and the oracle still include the deep detectors. That is the whole method: one probe, one grade per detector, an argmax, with a single parameter (the resample fraction) and no thresholds to tune.
 
-**What matters.** Table 5 isolates the design choices. Two earn the result. First, drawing the resampled value from the feature's *observed* values rather than a continuous interpolation: on discrete features an interpolated value never occurs in the data, which lets marginal detectors trivially flag the probe and be wrongly selected; the observed-value draw removes that artifact and lowers regret from 0.122 to 0.113. Second, restricting probe candidates to the classical detectors, without which deep detectors overfit the probe. The removed complexity (the second probe and the router) costs nothing: the single-probe method at 0.113 is better than the earlier routed design at 0.124.
+**What matters.** One design choice is not obvious and earns the result (Table 6): drawing the resampled value from the feature's *observed* values rather than a continuous interpolation. On discrete features an interpolated value never occurs in the data, which lets marginal detectors trivially flag the probe and be wrongly selected; the observed-value draw removes that artifact and lowers regret from 0.122 to 0.113. The classical-candidate restriction earns the rest: with deep detectors eligible to win the probe, regret rises as they overfit the synthetic anomalies.
 
-**Table 5.** SPARC ablation (mean regret over the 151 tasks, lower is better). The observed-value draw and the classical-candidate restriction earn the result; the second probe and the router, present in an earlier version, are unnecessary.
+**Table 6.** SPARC ablation (mean regret over the 151 tasks, lower is better).
 
 | SPARC variant | Regret |
 |---|---:|
 | SPARC (single probe, observed-value draw, classical candidates) | **0.113** |
-| Interpolated resampling, before the fix | 0.122 |
-| Earlier design (second probe + per-task routing) | 0.124 |
+| Resampling by bin interpolation instead of observed values | 0.122 |
 | Best fixed detector (reference) | 0.130 |
 
 **SPARC is the only selector that beats the fixed detector.** SPARC reaches regret 0.113, beating the best fixed detector (0.130) at $p=0.04$ and the internal criteria entropy and mass-volume (0.176, 0.174) at $p<0.001$ (Figure 6). Goswami's injection selector (0.122) matches the fixed detector but does not beat it. No method built on the shape of the normal-data score distribution clears the fixed-detector bar; only grading detectors on synthetic anomalies does. The result does not hinge on the deep detectors: as Section 4 shows, a fairly preprocessed classical pool supplies almost every dataset's oracle.
