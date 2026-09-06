@@ -144,6 +144,50 @@ footer{margin-top:3rem;padding-top:.9rem;border-top:.5px solid var(--rule);font-
 <figcaption><b>Figure 1.</b> Detector evaluation on the 151-dataset ADReal benchmark: mean base-rate-normalized average precision per detector (higher is better), colored by family, with the number of datasets on which each detector is the oracle-best. Neighbor and density detectors lead; classical detectors supply the oracle on 78% of datasets, and the deep pool adds only 0.021 to the average oracle.</figcaption>
 </figure>
 
+<p>Grouping detectors by family (Table 1) shows why no family is dispensable and why a family's average is a poor guide to when it wins. The neighbor and density family supplies almost half of all per-dataset oracles. The distribution family has a low average yet supplies the oracle on nearly a quarter of datasets, because a few of its members win outright on specific datasets; the isolation family has a respectable average but is never the single best.</p>
+<p><strong>Table 1.</strong> Detector families on the 151-dataset ADReal benchmark: number of detectors in the pool, the share of datasets on which the family supplies the oracle-best detector, and the family's mean base-rate-normalized average precision (ap_norm).</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th style="text-align: right;">Detectors</th>
+<th style="text-align: right;">Oracle-best share</th>
+<th style="text-align: right;">Mean ap_norm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Density / neighbor</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">45%</td>
+<td style="text-align: right;">0.166</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">24%</td>
+<td style="text-align: right;">0.087</td>
+</tr>
+<tr>
+<td>Deep</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">22%</td>
+<td style="text-align: right;">0.123</td>
+</tr>
+<tr>
+<td>Projection</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">9%</td>
+<td style="text-align: right;">0.072</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">0.106</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Agreement-based selectors fall below random under the leakage-free protocol.</strong> Figure 2 gives the selection regret of every method on the 151-task benchmark. The agreement-based methods that lead under transductive evaluation, consensus, model-centrality, and HITS, all land <em>above</em> the uniform-random reference (regret 0.232 to 0.235 versus 0.220), each significantly worse than SPARC ($p<0.001$). With no anomalies in the validation split, the quantity these methods rank on is dominated by detector behavior on normals, and that quantity does not track detection skill. Entropy (EM) and mass-volume (MV) survive the protocol, at regret 0.176 and 0.174.</p>
 <figure>
 <img src="figures/fig_leaderboard.png" alt="Horizontal bar chart of selection regret per method; SPARC lowest at 0.124, entropy and mass-volume near 0.175, consensus/model-centrality/HITS above the random reference.">
