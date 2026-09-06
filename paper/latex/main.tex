@@ -115,7 +115,7 @@ We build ADReal by curating existing benchmarks: we filter out contaminated anom
 
 Anomalies are not representative samples by definition, so the right detector for a dataset must be chosen from its normal data alone, often with no trustworthy anomalies at all. The popular criteria that do this are themselves methods that need a fair benchmark to be judged on, and on ADReal most of them fail: the widely-used approaches that rank detectors by how much they agree with one another do worse than picking at random, and only two criteria, entropy and mass-volume, beat a random pick.
 
-SPARC builds synthetic anomalies from the normal data and grades detectors on how well they find them, and is the only method to significantly beat both survivors: regret, the gap to the best available detector, is 0.124 versus 0.176 for entropy and 0.174 for mass-volume, \(p<0.001\) against each. The gain is decisive on time series (0.05 versus 0.15) and holds on tabular data. We release the benchmark, the detector scores, and the code.
+We introduce SPARC, a model-selection method that builds synthetic anomalies from the normal data and grades detectors on how well they find them. It is the only method to significantly beat both survivors: regret, the gap to the best available detector, is 0.124 versus 0.176 for entropy and 0.174 for mass-volume, \(p<0.001\) against each. The gain is decisive on time series (0.05 versus 0.15) and holds on tabular data. We release the benchmark, the detector scores, and the code.
 \end{abstract}
 
 \end{frontmatter}
