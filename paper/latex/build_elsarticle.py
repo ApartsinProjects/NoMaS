@@ -65,6 +65,13 @@ def main():
     tex = re.sub(r"\\href\{nomas[^}]*\}\{[^}]*\}", "", tex)
     # strip the HTML page footer ("ADReal $\cdot$ <title>") that the converter pulls into the body
     tex = re.sub(r"ADReal \$\\cdot\$ [^\n]*\n?", "", tex)
+
+    # de-float the short data tables (markdown pipe tables -> tabularx). Their captions live in
+    # the preceding "\textbf{Table N.}" paragraph, so as floats the grid drifts away from the
+    # caption. Rendering the tabularx inline keeps each grid directly under its caption. Figures
+    # keep their float (\begin{figure}); only \begin{table} wrappers are removed.
+    tex = re.sub(r"\\begin\{table\}(\[[^\]]*\])?\s*(\\centering\s*)?", "\n\\\\vspace{2pt}\\\\noindent\n", tex)
+    tex = tex.replace("\\end{table}", "\n\\vspace{2pt}\n")
     tex = uni(tex)
 
     # make long bibliography URLs breakable: xurl breaks anywhere, and inside
