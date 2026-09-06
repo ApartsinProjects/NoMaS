@@ -26,10 +26,9 @@ The honest protocol changes the result. Agreement-based selectors, which dominat
 
 Our contributions:
 
-1. **ADReal**, a contamination-controlled benchmark for evaluating unsupervised model selection in anomaly detection, produced by a detector-free and reproducible pipeline that removes trivial, unsolvable, and mislabeled tasks, closes train/test leakage, caps the base rate, deduplicates anomalies, and imposes paired significance, and that scores every detector under one consistent preprocessing.
-2. **An evaluation of roughly thirty classical and deep anomaly detectors** on ADReal, establishing the per-task oracle-best detector against which selection is measured.
-3. **An evaluation of eight selection methods under the leakage-free protocol**, showing that widely-cited agreement selectors (consensus, model-centrality, HITS) fall below random when the leak is closed and selection sees normals only, while entropy and mass-volume survive.
-4. **SPARC**, a selector that grades detectors on label-free synthetic probes of the normal data, and is the only method that significantly beats both surviving baselines (regret 0.124; $p<0.001$ against each), decisively on time series and holding on tabular data.
+1. **ADReal, a contamination-controlled benchmark that makes anomaly-detection evaluation reliable.** A single detector-free, reproducible pipeline removes the trivial, unsolvable, and mislabeled tasks, closes train/test leakage, caps the base rate, deduplicates anomalies, and imposes paired significance, so that comparisons of detectors and of selection methods alike measure skill rather than artifacts. From 173 constructed tasks, 151 survive; on them we evaluate roughly thirty classical and deep detectors under one consistent preprocessing, which fixes the oracle-best detector that defines regret.
+2. **A fair, leakage-free protocol for label-free evaluation, and what it reveals.** Because both per-dataset model selection and generic detector evaluation are carried out without seeing anomalies, ADReal computes every label-free criterion on held-out normals only, measuring them as they are deployed. Under this protocol the widely-cited agreement selectors (consensus, model-centrality, HITS) fall below a random pick, and only entropy and mass-volume survive, reversing their apparent lead under transductive evaluation.
+3. **SPARC, a selector that beats the survivors.** SPARC grades detectors on label-free synthetic probes built from the normal data, and is the only method that significantly beats both entropy and mass-volume (regret 0.124; $p<0.001$ against each), decisively on time series and holding on tabular data.
 
 ## 2. Related work
 
