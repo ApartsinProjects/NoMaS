@@ -87,7 +87,7 @@ def main():
     # promote the two WIDE figures (fig_anisotropy two-panel, fig_leaderboard bars) to full-width figure*
     def promote(mobj):
         blk = mobj.group(0)
-        if "fig_leaderboard" in blk or "fig_modality" in blk or "fig_detectors" in blk:
+        if "figures/fig_" in blk or "\\includegraphics" in blk:  # all figures are wide/multi-panel
             blk = blk.replace(r"\begin{figure}[tbp]", r"\begin{figure*}[t]").replace(r"\end{figure}", r"\end{figure*}")
         return blk
     tex = re.sub(r"\\begin\{figure\}\[tbp\].*?\\end\{figure\}", promote, tex, flags=re.S)
