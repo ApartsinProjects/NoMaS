@@ -440,7 +440,7 @@ Best fixed detector (reference) & 0.130 \\
 
 \textbf{SPARC comes closest, but the advantage is modest and not significant.} SPARC\textquotesingle s ten-seed mean regret is \(0.114 \pm 0.004\) (SD over seeds), below the best fixed detector (0.130) and far below the internal criteria excess-mass and mass-volume (0.163, 0.165) at \(p<0.001\). Its edge over the fixed detector, though, is not statistically significant: the seed-averaged paired advantage of 0.016 gives \(p=0.076\), and a Holm correction across the classical-pool selector comparisons leaves it non-significant as well. Only the sign of the advantage is stable: SPARC\textquotesingle s mean advantage over the fixed detector is positive on all five source collections, largest on OddBench.
 
-\textbf{Where SPARC\textquotesingle s edge over a fixed neighbor detector comes from.} The fixed detector is itself a neighbor detector (LOF with \(k=10\)), so SPARC\textquotesingle s gain does not come from leaving the neighbor family: on the tasks where it wins, SPARC\textquotesingle s pick is usually a smaller-neighborhood LOF or KNN, so its edge is choosing the neighborhood size per task where a fixed choice cannot.
+\textbf{Where SPARC\textquotesingle s edge over a fixed neighbor detector comes from.} The fixed detector is itself a neighbor detector (LOF with \(k=10\)), so SPARC\textquotesingle s gain does not come from leaving the neighbor family: at a single probe seed, of the 63 tasks it wins the pick is a neighbor detector on 60 and a smaller-neighborhood LOF or KNN (\(k<10\)) on 55, so its edge is choosing the neighborhood size per task where a fixed choice cannot.
 
 \begin{figure*}[t]
 \centering
