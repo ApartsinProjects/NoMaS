@@ -46,7 +46,10 @@ def call(model, context, turns, system="You are a rigorous senior ML research st
     msgs = [{"role": "system", "content": system},
             {"role": "user", "content": [ctx_block]}] + turns
     body = {"model": model, "messages": msgs, "max_tokens": max_tokens, "usage": {"include": True}}
-    if reasoning: body["reasoning"] = {"effort": reasoning}
+    if reasoning:
+        # Anthropic: an effort level alone can spend the whole output budget on hidden reasoning (seen:
+        # 16000/16000 tokens, empty answer). Cap reasoning explicitly at half the output limit.
+        body["reasoning"] = ({"max_tokens": max_tokens // 2} if model.startswith("anthropic/") else {"effort": reasoning})
     req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=json.dumps(body).encode(),
                                  headers={"Authorization": "Bearer " + _key(), "Content-Type": "application/json",
                                           "X-Title": "ADRank ResearchPivot"})
@@ -62,7 +65,10 @@ def call(model, context, turns, system="You are a rigorous senior ML research st
                    "completion_tokens": u.get("completion_tokens"), "cost": float(u.get("cost") or 0.0),
                    "seconds": round(time.time() - t0, 1)}
             with open(LEDGER, "a", encoding="utf-8") as fo: fo.write(json.dumps(rec) + "\n")
-            return r["choices"][0]["message"]["content"], rec
+            text = r["choices"][0]["message"].get("content")
+            if not text:      # spent the budget without answering: do not retry blindly at the same cost
+                raise ValueError(f"empty answer from {model} ({rec['completion_tokens']} tokens, likely all reasoning)")
+            return text, rec
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, RuntimeError) as e:
             last = e
             code = getattr(e, "code", None)

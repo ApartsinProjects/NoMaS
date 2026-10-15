@@ -1,1 +1,4 @@
 {"t": "2026-10-15 19:39:10", "tag": "smoke", "model": "openai/gpt-6-luna", "prompt_tokens": 38, "cached_tokens": 0, "completion_tokens": 17, "cost": 1.23e-05, "seconds": 1.5}
+{"t": "2026-10-16 00:02:49", "tag": "cycle2-second", "model": "anthropic/claude-sonnet-5.5", "prompt_tokens": 42807, "cached_tokens": 0, "completion_tokens": 16000, "cost": 0.258706, "seconds": 138.7}
+{"t": "2026-10-16 00:03:46", "tag": "cycle2-strategist", "model": "openai/gpt-6.1-sol-pro", "prompt_tokens": 95897, "cached_tokens": 26444, "completion_tokens": 14904, "cost": 0.3038124, "seconds": 196.4}
+{"t": "2026-10-16 00:06:48", "tag": "cycle2-second-retry", "model": "anthropic/claude-sonnet-5.5", "prompt_tokens": 42807, "cached_tokens": 26184, "completion_tokens": 15367, "cost": 0.1895344, "seconds": 127.2}

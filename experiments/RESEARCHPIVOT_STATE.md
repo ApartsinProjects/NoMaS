@@ -76,8 +76,34 @@ results", which risks "incremental over ADBench / just negative" at D&B venues. 
   already near-optimal there. Abstain-unless-margin variant: G5 0.42.
 - (2) RANK REVERSALS: not run (needs raw reconstruction); prior art is crowded (Kluttermann et al. 2026
   ranking instability on 690 OddBench datasets; Deng 2026 overlap).
-- Pending decisive check: does TRAINING on the same k labels (LR / RF / nearest-labeled-anomaly) beat
-  SELECTING with them?
+- Decisive incumbent check DONE (112 tabular tasks, 10 draws): TRAINING on the same k labels beats
+  SELECTING with them from k=2. Gap closed vs fixed (G; >1 = beats the per-task oracle of the 25
+  unsupervised detectors): k=1 SEL 0.28 / LR 0.23; k=2 0.34 / 0.66; k=3 0.44 / 0.86; k=5 0.55 / 1.07;
+  k=10 SEL 0.63, LR 1.34, RF 1.44. Per source at k=5: OddBench LR 1.38 (beats oracle on 23/38),
+  OvrBench 0.86 (33/66), ADBench 0.20 (n=5), DAMI 1.74 (n=3). Nearest-labeled-anomaly distance only
+  0.07 (so not a near-duplicate effect). NEGATIVE CONTROL (5 normals mislabeled as anomalies): regret
+  0.34 vs fixed 0.14 -> pipeline sound.
+- Stress tests (k=5): UNSEEN TYPE (labels from one k-means anomaly cluster, test on the others): LR -0.25
+  (worse than default, loses on 66/111), SEL 0.05, HYBRID rank-average(LR, LOF_k10) +0.22. Same draws on
+  all types: LR 0.61, HYB 0.88. REALISTIC 2% PREVALENCE: LR 1.30, HYB 1.44. HYB was pre-specified.
+- Current lead: "label-free selection cannot beat a strong default, but 2-5 labeled anomalies with a
+  linear model hedged by the default beat every unsupervised choice; pure few-label supervision fails on
+  unseen anomaly types, the hedge does not." Main risk: novelty vs ADBench semi-supervised results,
+  OneShot (arXiv 2610.16219, TS label-efficient detector weighting), open-set supervised AD (DRA etc.).
+
+### Cycle 2 (2026-10-16): strategist (gpt-6.1-sol-pro) + second opinion (claude-sonnet-5.5) via
+OpenRouter both converge: thesis "spend a few labels on TRAINING, not selection; hedge with a strong
+unsupervised default"; target TMLR (45-65% if confirmed), DMKD fallback. Prior art: WSADBench (KDD 2026
+D&B, 1/5/10 labels, known/unknown types) is the main overlap; it has no per-dataset oracle and no hedge.
+Smoke of the most likely sinking objection (label-acquisition realism), fixed evaluation set, 112 tabular
+tasks x 10 reps, INDUCTIVE hedge (empirical CDFs on validation normals):
+  random 5 labels: SEL 0.50, LR 1.04, HYBi 1.09; incumbent-CAUGHT (LOF top-20, ~11 labels): SEL 0.05,
+  LR 0.70, HYBi 0.85; CAUGHT top-50 (~27): SEL 0.04, LR 1.17, HYBi 1.12; incumbent-MISSED 5: SEL 0.38,
+  LR 0.95, HYBi 1.02. HYBi worse than the default on 10-17 of 112 tasks.
+  -> selection collapses under realistic acquisition; training + hedge does not. VALIDATED LEAD; loop
+  stopped after cycle 2. Semantic anomaly types recoverable for ADBench CV/NLP families (CIFAR10,
+  FashionMNIST 100%, 20news 99%, agnews 30%) by exact embedding match; OvrBench/OddBench raw data has no
+  per-anomaly class.
 
 ## 5. Assets available today
 
