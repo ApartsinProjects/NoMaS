@@ -30,3 +30,7 @@ data/ovrbench/
 data/ucr/
 data/tsbad/
 secrets/
+# large data, released via Zenodo instead of git
+artifacts/modal/bv2/
+artifacts/modal/valscores/
+artifacts/modal/_idx/

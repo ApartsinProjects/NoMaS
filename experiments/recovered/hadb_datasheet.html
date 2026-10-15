@@ -1,0 +1,363 @@
+<title>HADB Datasheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#f5f6f8; --surface:#ffffff; --surface2:#eef1f5;
+  --ink:#171c26; --muted:#5b6673; --faint:#8b96a4; --hair:#e0e5ec;
+  --accent:#c1440e; --accent-soft:#f0e0d8; --accent-ink:#a03608;
+  --ok:#15803d; --ok-soft:#dcf0e3; --bad:#b91c1c;
+  --field:#c9d3de; /* "normal data" fill in bars */
+  --shadow:0 1px 2px rgba(20,30,45,.06),0 8px 24px rgba(20,30,45,.05);
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme:dark){
+    --ground:#0e1218; --surface:#151b24; --surface2:#1c2531;
+    --ink:#e9edf3; --muted:#9aa5b3; --faint:#6b7787; --hair:#26303c;
+    --accent:#f97316; --accent-soft:#3a2415; --accent-ink:#fdba74;
+    --ok:#4ade80; --ok-soft:#16301f; --bad:#f87171;
+    --field:#38424f;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0e1218; --surface:#151b24; --surface2:#1c2531;
+  --ink:#e9edf3; --muted:#9aa5b3; --faint:#6b7787; --hair:#26303c;
+  --accent:#f97316; --accent-soft:#3a2415; --accent-ink:#fdba74;
+  --ok:#4ade80; --ok-soft:#16301f; --bad:#f87171;
+  --field:#38424f;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:clamp(20px,4vw,56px) clamp(16px,4vw,40px)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:"Archivo",sans-serif;text-wrap:balance;line-height:1.1;margin:0}
+a{color:var(--accent-ink)}
+
+/* masthead */
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--accent);font-weight:600}
+.mast h1{font-size:clamp(2.4rem,6vw,3.8rem);font-weight:800;letter-spacing:-.02em;margin:.28em 0 .2em}
+.mast .def{font-size:clamp(1.02rem,2.2vw,1.2rem);color:var(--muted);max-width:64ch}
+.mast .meta{margin-top:14px;font-size:.82rem;color:var(--faint)}
+.mast .meta b{color:var(--muted);font-weight:600}
+.rule{height:3px;background:var(--accent);width:64px;border-radius:2px;margin:22px 0 0}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;
+  background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+  margin:34px 0 8px;box-shadow:var(--shadow)}
+.stat{background:var(--surface);padding:18px 16px}
+.stat .n{font-family:"Archivo",sans-serif;font-weight:800;font-size:1.9rem;letter-spacing:-.02em}
+.stat .n small{font-size:.9rem;color:var(--faint);font-weight:600}
+.stat .l{font-size:.72rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.stat.hero .n{color:var(--accent)}
+
+section{margin-top:52px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.sec-h .num{font-family:"IBM Plex Mono",monospace;color:var(--accent);font-size:.85rem;font-weight:600}
+.sec-h h2{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:70ch;margin:2px 0 22px}
+
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:12px;
+  padding:22px 22px;box-shadow:var(--shadow)}
+
+/* funnel */
+.funnel{display:flex;flex-direction:column;gap:14px}
+.frow{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center}
+.frow .name{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--muted)}
+.frow .name b{display:block;color:var(--ink);font-weight:600;font-size:.84rem}
+.bar{display:flex;height:30px;border-radius:6px;overflow:hidden;background:var(--surface2);
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem}
+.bar span{display:flex;align-items:center;justify-content:center;color:#fff;min-width:0;
+  white-space:nowrap;overflow:hidden}
+.seg-inc{background:var(--accent)}
+.seg-drop{background:var(--field);color:var(--muted)!important}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}
+
+/* tables */
+.scroll{overflow-x:auto;border-radius:10px;border:1px solid var(--hair)}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{padding:9px 13px;text-align:right;border-bottom:1px solid var(--hair);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--surface2);font-family:"IBM Plex Sans",sans-serif;font-weight:600;
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:none}
+tbody td{font-family:"IBM Plex Mono",monospace}
+tbody td:first-child{font-family:"IBM Plex Sans",sans-serif;font-weight:500}
+tr.total td{background:var(--surface2);font-weight:700;border-top:2px solid var(--hair)}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:.72rem;padding:1px 7px;border-radius:5px;
+  background:var(--accent-soft);color:var(--accent-ink);font-weight:500}
+
+/* quantile bars */
+.dist{display:flex;flex-direction:column;gap:20px}
+.dist-row .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.dist-row .top .lab{font-weight:600;font-size:.9rem}
+.dist-row .top .rng{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--faint)}
+.track{position:relative;height:34px;background:var(--surface2);border-radius:7px}
+.box{position:absolute;top:6px;height:22px;background:var(--accent-soft);
+  border:1px solid var(--accent);border-radius:4px}
+.median{position:absolute;top:2px;height:30px;width:2.5px;background:var(--accent);border-radius:2px}
+.whisk{position:absolute;top:16px;height:2px;background:var(--field)}
+.tick{position:absolute;top:100%;font-family:"IBM Plex Mono",monospace;font-size:.66rem;
+  color:var(--faint);transform:translateX(-50%);margin-top:3px}
+
+/* two-col */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}.frow{grid-template-columns:96px 1fr}}
+
+/* checks */
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.chk{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--hair);border-radius:10px;padding:14px 15px}
+.chk .badge{font-family:"IBM Plex Mono",monospace;font-size:.66rem;font-weight:600;
+  padding:2px 8px;border-radius:5px;background:var(--ok-soft);color:var(--ok);flex-shrink:0;margin-top:1px}
+.chk .txt{font-size:.85rem}
+.chk .txt b{display:block;margin-bottom:1px}
+.chk .txt span{color:var(--faint);font-family:"IBM Plex Mono",monospace;font-size:.76rem}
+
+/* caveats */
+.notes{display:flex;flex-direction:column;gap:14px}
+.note{display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:.9rem}
+.note .k{font-family:"Archivo",sans-serif;font-weight:800;color:var(--accent);font-size:1rem}
+.note b{font-weight:600}
+
+.foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--hair);
+  font-size:.78rem;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.kicker{font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="eyebrow">Benchmark Datasheet</div>
+    <h1>HADB</h1>
+    <div class="def">A hard-anomaly benchmark for <b>unsupervised model selection</b>: trivial anomalies and low-spread datasets are filtered out, leaving only datasets where choosing the right detector, without labels, genuinely matters.</div>
+    <div class="rule"></div>
+    <div class="meta mono"><b>Protocol:</b> detectors fit on normal data only &nbsp;·&nbsp; <b>Primary metric:</b> ap_norm = (AP − base)/(1 − base) &nbsp;·&nbsp; <b>Ground truth:</b> per-dataset ranking over the candidate pool</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat hero"><div class="n">307</div><div class="l">Datasets included</div></div>
+    <div class="stat"><div class="n">302</div><div class="l">Effective N (dedup)</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">Modalities</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">Source corpora</div></div>
+    <div class="stat"><div class="n">34</div><div class="l">Distinct winners</div></div>
+    <div class="stat"><div class="n">1151<small> → 307</small></div><div class="l">Screened → kept (27%)</div></div>
+  </div>
+
+  <!-- 1. FUNNEL -->
+  <section>
+    <div class="sec-h"><span class="num">01</span><h2>Filter funnel</h2></div>
+    <p class="lede">Every candidate dataset is screened by the same pipeline. A dataset survives only if enough of its anomalies resist a trivial rule, it is not degenerate or over-dense, some detector beats the base rate (not floor), and detectors actually spread apart (selection matters). Bars show, per corpus, the fraction <b>included</b> versus <b>screened out</b>.</p>
+    <div class="card">
+      <div class="funnel" id="funnel"></div>
+      <div class="legend">
+        <span><i style="background:var(--accent)"></i>Included</span>
+        <span><i style="background:var(--field)"></i>Screened out (trivial · degenerate · high base-rate · all-trivial · floor · low-spread)</span>
+      </div>
+    </div>
+    <div class="scroll" style="margin-top:18px">
+      <table id="funnel-tbl"></table>
+    </div>
+  </section>
+
+  <!-- 2. COMPOSITION -->
+  <section>
+    <div class="sec-h"><span class="num">02</span><h2>Composition &amp; provenance</h2></div>
+    <p class="lede">Two modalities across six public corpora. Tabular triviality is measured per anomaly (share dropped); time-series triviality is measured per series (share of whole series solvable by a one-liner). Dev corpora carry the classic labelled collections; test corpora are held aside.</p>
+    <div class="scroll">
+      <table id="comp-tbl"></table>
+    </div>
+  </section>
+
+  <!-- 3. DISTRIBUTIONS -->
+  <section>
+    <div class="sec-h"><span class="num">03</span><h2>Difficulty distributions</h2></div>
+    <p class="lede">Box = interquartile range, line = median, whiskers = min/max, over the 307 included datasets. <b>best_ap_norm</b> is how well the single best detector does; <b>spread</b> is the gap between best and mean; both are the levers a selection method is judged on.</p>
+    <div class="card dist" id="dist"></div>
+  </section>
+
+  <!-- 4. STRUCTURE -->
+  <section>
+    <div class="sec-h"><span class="num">04</span><h2>What a selector must predict</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="font-size:1.05rem;margin-bottom:4px">Winner structure</h3>
+        <p style="color:var(--muted);font-size:.86rem;margin:0 0 14px">No detector wins everywhere; if one did, there would be nothing to select.</p>
+        <div class="scroll"><table id="win-tbl"></table></div>
+        <p class="mono" style="font-size:.76rem;color:var(--faint);margin:12px 0 0">
+          34 distinct winners · top takes 15% · top-5 take 52% · family mix local 60% / global 40%</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1.05rem;margin-bottom:4px">Are the knobs independent?</h3>
+        <p style="color:var(--muted);font-size:.86rem;margin:0 0 14px">Pearson r among dataset properties. Near-zero means the property adds independent difficulty; high means two are the same knob.</p>
+        <div class="scroll"><table id="corr-tbl"></table></div>
+        <p class="mono" style="font-size:.76rem;color:var(--faint);margin:12px 0 0">
+          base-rate ⟂ difficulty (r=0.06): ap_norm normalisation works.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. VALIDITY -->
+  <section>
+    <div class="sec-h"><span class="num">05</span><h2>Adversarial validity checks</h2></div>
+    <p class="lede">Each check states its expected outcome before running, so a silent defect shows up as a violated invariant. All pass on the consolidated benchmark.</p>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <!-- 6. CAVEATS -->
+  <section>
+    <div class="sec-h"><span class="num">06</span><h2>Known characteristics</h2></div>
+    <div class="card notes">
+      <div class="note"><span class="k">A</span><div><b>Base-rate regimes differ by modality.</b> Tabular datasets pile at the 0.25 test-rate cap (q3 = 0.250); time series sit much lower (median 0.066). The primary metric ap_norm normalises for base rate, and its near-zero correlation with difficulty (r = 0.06) confirms the normalisation holds across both regimes.</div></div>
+      <div class="note"><span class="k">B</span><div><b>Pool size tracks modality, not difficulty.</b> Time-series arms rank 23 candidates, tabular arms 35–36. That is why base_rate and n_variants correlate (r = 0.56): n_variants is a per-arm pool marker, not a difficulty lever. A selector ranks whatever a dataset lists.</div></div>
+      <div class="note"><span class="k">C</span><div><b>best_ap_norm and best_auc are redundant (r = 0.86).</b> Both answer "how good is the best detector". ap_norm is the single primary; AUC and pAUC@10 are retained only as secondaries.</div></div>
+      <div class="note"><span class="k">D</span><div><b>Local detectors lead the winner mix.</b> LOF variants take the largest share, though 34 detectors win somewhere and the global family still claims 40% of datasets. The candidate pool carries six LOF configurations, so LOF prominence partly reflects pool composition.</div></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span class="kicker">HADB · consolidated 2026-09-03 · 8 audit bugs fixed, all invariants verified</span>
+    <span class="kicker">exports: HADB_MANIFEST · HADB_INCLUDED · HADB_FUNNEL</span>
+  </div>
+</div>
+
+<script>
+// ---- data ----
+const funnel = [
+  {c:"adbench+dami", mod:"tabular · dev",  entered:39,  included:21},
+  {c:"OddBench",     mod:"tabular · test", entered:187, included:75},
+  {c:"OvrBench",     mod:"tabular · test", entered:175, included:103},
+  {c:"TSB-AD-U",     mod:"series · dev",   entered:300, included:20},
+  {c:"UCR",          mod:"series · test",  entered:250, included:57},
+  {c:"TSB-AD-M",     mod:"series · test",  entered:200, included:31},
+];
+const funnelDetail = [ // entered, rate_high, too_few_hard, too_small, trivial, too_short, scored, floor, low_spread, included
+  ["adbench+dami",39,10,6,1,0,0,22,0,1,21],
+  ["OddBench",187,31,33,16,0,0,107,21,11,75],
+  ["OvrBench",175,3,14,3,0,0,155,34,17,103],
+  ["TSB-AD-U",300,0,0,0,230,45,25,3,2,20],
+  ["UCR",250,0,0,0,143,13,94,28,8,57],
+  ["TSB-AD-M",200,0,0,0,138,23,39,2,6,31],
+];
+const comp = [ // corpus, modality, type, included, triv, sizes, dims
+  ["adbench+dami","tabular","dev",21,"21% anom","n 240–5k (med 3656)","d 5–1555 (med 16)"],
+  ["OddBench","tabular","test",75,"12% anom","n 437–5k (med 4038)","d 3–91 (med 7)"],
+  ["OvrBench","tabular","test",103,"15% anom","n 597–5k (med 5000)","d 3–308 (med 9)"],
+  ["TSB-AD-U","series","dev",20,"77% series","len 9k–40k","univariate"],
+  ["UCR","series","test",57,"57% series","len 7.5k–40k","univariate"],
+  ["TSB-AD-M","series","test",31,"69% series","len 5k–40k","2–20 channels"],
+];
+const dist = [
+  {lab:"base_rate",      q:[0.012,0.076,0.204,0.250,0.25], dmin:0,dmax:0.25, fmt:v=>v.toFixed(3)},
+  {lab:"best_ap_norm",   q:[0.107,0.330,0.514,0.735,1.0],  dmin:0,dmax:1,    fmt:v=>v.toFixed(2)},
+  {lab:"spread_ap_norm", q:[0.100,0.172,0.256,0.382,0.850],dmin:0,dmax:1,    fmt:v=>v.toFixed(2)},
+  {lab:"best_auc",       q:[0.599,0.763,0.864,0.944,1.0],  dmin:0.5,dmax:1,  fmt:v=>v.toFixed(2)},
+];
+const winners = [["LOF_k3",46,"15%"],["LOF_k10",42,"14%"],["KNN_k3",31,"10%"],
+  ["HBOS_b100",25,"8%"],["ECOD",15,"5%"],["COPOD",12,"4%"]];
+const corr = [
+  ["base_rate","1.00","0.06","−0.02","−0.16","0.56"],
+  ["best_ap_norm","0.06","1.00","0.59","0.86","0.01"],
+  ["spread","−0.02","0.59","1.00","0.54","0.11"],
+  ["best_auc","−0.16","0.86","0.54","1.00","0.07"],
+  ["n_variants","0.56","0.01","0.11","0.07","1.00"],
+];
+const corrHead=["","base_rate","best_ap","spread","best_auc","n_var"];
+const checks = [
+  ["base rate ≤ 0.25 cap","max 0.2500"],
+  ["every dataset spread ≥ 0.10","min 0.1004"],
+  ["no floor datasets leaked in","zones: live only"],
+  ["best detector beats base rate","min best_ap_norm 0.107"],
+  ["≥ 12 distinct winners","34 distinct, top 15%"],
+  ["both families win somewhere","local 60% / global 40%"],
+  ["no phantom scored rows","0 scored-with-0-rows"],
+  ["no mixed-label duplicates","dropped whole groups"],
+];
+
+// ---- render funnel bars ----
+const F=document.getElementById("funnel");
+funnel.forEach(r=>{
+  const incPct=(100*r.included/r.entered);
+  F.insertAdjacentHTML("beforeend",`
+   <div class="frow">
+     <div class="name"><b>${r.c}</b>${r.mod}</div>
+     <div class="bar">
+       <span class="seg-inc" style="flex:${r.included}">${incPct>=8?r.included:""}</span>
+       <span class="seg-drop" style="flex:${r.entered-r.included}">${r.entered-r.included} of ${r.entered}</span>
+     </div>
+   </div>`);
+});
+
+// ---- funnel table ----
+const fh=["Corpus","Entered","rate&gt;.25","all-trivial","too small","trivial","short/dense","Scored","Floor","Low-spread","Included"];
+let ft=`<thead><tr>${fh.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>`;
+let tot=[0,0,0,0,0,0,0,0,0,0];
+funnelDetail.forEach(r=>{
+  ft+=`<tr>${r.map((v,i)=>i===0?`<td>${v}</td>`:`<td>${v||"·"}</td>`).join("")}</tr>`;
+  r.slice(1).forEach((v,i)=>tot[i]+=v);
+});
+ft+=`<tr class="total"><td>TOTAL</td>${tot.map(v=>`<td>${v}</td>`).join("")}</tr></tbody>`;
+document.getElementById("funnel-tbl").innerHTML=ft;
+
+// ---- composition table ----
+const ch=["Corpus","Modality","Split","Included","Triviality removed","Size","Dimensionality"];
+let ct=`<thead><tr>${ch.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>`;
+comp.forEach(r=>{
+  ct+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td><span class="tag">${r[2]}</span></td>
+   <td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`;
+});
+ct+=`<tr class="total"><td>Total</td><td>2 modalities</td><td>—</td><td>307</td><td colspan="3">effective N 302 · 5 correlated members collapsed</td></tr></tbody>`;
+document.getElementById("comp-tbl").innerHTML=ct;
+
+// ---- distributions ----
+const D=document.getElementById("dist");
+dist.forEach(d=>{
+  const [mn,q1,md,q3,mx]=d.q, span=d.dmax-d.dmin;
+  const p=v=>100*(v-d.dmin)/span;
+  D.insertAdjacentHTML("beforeend",`
+    <div class="dist-row">
+      <div class="top"><span class="lab">${d.lab}</span>
+        <span class="rng">min ${d.fmt(mn)} · med ${d.fmt(md)} · max ${d.fmt(mx)}</span></div>
+      <div class="track">
+        <div class="whisk" style="left:${p(mn)}%;width:${p(q1)-p(mn)}%"></div>
+        <div class="whisk" style="left:${p(q3)}%;width:${p(mx)-p(q3)}%"></div>
+        <div class="box" style="left:${p(q1)}%;width:${p(q3)-p(q1)}%"></div>
+        <div class="median" style="left:${p(md)}%"></div>
+        <div class="tick" style="left:${p(mn)}%">${d.fmt(mn)}</div>
+        <div class="tick" style="left:${p(md)}%">${d.fmt(md)}</div>
+        <div class="tick" style="left:${p(mx)}%">${d.fmt(mx)}</div>
+      </div>
+    </div>`);
+});
+
+// ---- winners ----
+let wt=`<thead><tr><th>Detector</th><th>Wins</th><th>Share</th></tr></thead><tbody>`;
+winners.forEach(r=>wt+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`);
+wt+=`</tbody>`;document.getElementById("win-tbl").innerHTML=wt;
+
+// ---- corr ----
+let rt=`<thead><tr>${corrHead.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>`;
+corr.forEach(r=>{
+  rt+="<tr>"+r.map((v,i)=>{
+    if(i===0)return `<td>${v}</td>`;
+    const num=parseFloat(v.replace("−","-"));
+    const hot=Math.abs(num)>=0.5&&Math.abs(num)<1;
+    return `<td style="${hot?'color:var(--accent);font-weight:600':''}">${v}</td>`;
+  }).join("")+"</tr>";
+});
+rt+=`</tbody>`;document.getElementById("corr-tbl").innerHTML=rt;
+
+// ---- checks ----
+const C=document.getElementById("checks");
+checks.forEach(c=>C.insertAdjacentHTML("beforeend",
+  `<div class="chk"><span class="badge">PASS</span><div class="txt"><b>${c[0]}</b><span>${c[1]}</span></div></div>`));
+</script>
