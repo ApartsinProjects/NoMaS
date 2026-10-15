@@ -34,3 +34,8 @@ secrets/
 artifacts/modal/bv2/
 artifacts/modal/valscores/
 artifacts/modal/_idx/
+
+# secrets
+.env
+experiments/pivot/scores/
+experiments/pivot/*.pkl

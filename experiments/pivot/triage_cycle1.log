@@ -1,0 +1,19 @@
+tasks with scores: 150 of 150 kept
+analysed 150 tasks
+
+ARM A: few labeled anomalies used only to choose a detector
+  k     R_k   R_fix    G_k draws>fix abstain R abstain G
+  1  0.0946  0.1081  0.125       87%    0.0926     0.143
+  2  0.0861  0.1080  0.203       97%    0.0843     0.219
+  3  0.0801  0.1080  0.258      100%    0.0776     0.282
+  5  0.0650  0.1079  0.397      100%    0.0628     0.418
+ 10  0.0545  0.1075  0.493      100%    0.0528     0.508
+  k=5 by source (G): {'ADBench': 0.23, 'DAMI': 0.324, 'OddBench': 0.688, 'OvrBench': 0.473, 'TS': -2.913}
+  k=5 per-task: tasks worse than fixed by > 0.05: 34  better by > 0.05: 45
+
+ARM C: calibrated no-label portfolio vs LOF_k10
+  LOF_k10        regret 0.1082  recall@5% 0.178  test FPR 0.051
+  LC             regret 0.1475  G -0.364  recall@5% 0.151 (gain -15.2%)  test FPR 0.052  n=150
+  LH             regret 0.1278  G -0.182  recall@5% 0.157 (gain -11.9%)  test FPR 0.051  n=150
+  LCP            regret 0.1514  G -0.400  recall@5% 0.142 (gain -20.2%)  test FPR 0.052  n=150
+  LCmean         regret 0.1540  G -0.424  recall@5% 0.149 (gain -16.7%)  test FPR 0.051  n=150

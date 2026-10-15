@@ -1,0 +1,19 @@
+tabular tasks: 112
+
+k=5  (regret; G = gap closed vs fixed)
+  FIX     regret  0.1381   G  0.000
+  SEL     regret  0.0623   G  0.549
+  LR      regret -0.0111   G  1.080
+  RF      regret  0.0252   G  0.817
+  KNNPOS  regret  0.1288   G  0.067
+  SELxRF  regret  0.0633   G  0.542
+  per-task: SEL better than RF on 48/112; SELxRF better than SEL on 53/112
+
+k=10  (regret; G = gap closed vs fixed)
+  FIX     regret  0.1379   G  0.000
+  SEL     regret  0.0509   G  0.631
+  LR      regret -0.0468   G  1.339
+  RF      regret -0.0607   G  1.441
+  KNNPOS  regret  0.1070   G  0.223
+  SELxRF  regret -0.0488   G  1.354
+  per-task: SEL better than RF on 35/112; SELxRF better than SEL on 79/112

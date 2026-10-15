@@ -1,0 +1,14 @@
+A1  k=5 absolute regret by source (pick / fixed / tasks):
+    ADBench   pick 0.0772  fixed 0.1002  n=5  worse>0.05: 2  better>0.05: 3
+    DAMI      pick 0.0794  fixed 0.1175  n=3  worse>0.05: 0  better>0.05: 2
+    OddBench  pick 0.0515  fixed 0.1653  n=38  worse>0.05: 6  better>0.05: 18
+    OvrBench  pick 0.0666  fixed 0.1263  n=66  worse>0.05: 8  better>0.05: 22
+    TS        pick 0.0731  fixed 0.0187  n=38  worse>0.05: 18  better>0.05: 0
+    TABULAR only: G5 = 0.549 (n=112)
+
+C1  portfolio LOF_k10+COPOD: anomalies at the p-value floor (ties): mean 4%, median 0%
+    regret: fixed 0.1082 | max -log p 0.1475 | same + tie-break 0.1462 | mean of standardized scores 0.1533
+
+A2  time series (n=38): distinct anomaly runs per task median 1; random 5-draw covers 1.0 runs on average
+    k=5 regret: random draws 0.0731 | segment-stratified draws 0.0705 | fixed 0.0187
+    tasks with a single anomaly run: 38 of 38

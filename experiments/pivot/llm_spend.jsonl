@@ -1,0 +1,1 @@
+{"t": "2026-10-15 19:39:10", "tag": "smoke", "model": "openai/gpt-6-luna", "prompt_tokens": 38, "cached_tokens": 0, "completion_tokens": 17, "cost": 1.23e-05, "seconds": 1.5}

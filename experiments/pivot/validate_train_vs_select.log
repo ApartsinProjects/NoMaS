@@ -1,0 +1,13 @@
+112 tabular tasks, 10 draws each
+
+ k     FIX     SEL       LR  G_SEL   G_LR |   FIX_f  LR_FAKE  invariant LR_FAKE>=FIX_f
+ 1  0.1384  0.0997   0.1069  0.280  0.228 |  0.1385   0.3493  PASS
+ 2  0.1383  0.0908   0.0466  0.343  0.663 |  0.1386   0.3551  PASS
+ 3  0.1383  0.0772   0.0195  0.442  0.859 |  0.1386   0.3498  PASS
+ 5  0.1380  0.0629  -0.0094  0.545  1.068 |  0.1387   0.3419  PASS
+
+k=5 by source:
+  ADBench   n=  5  FIX 0.1004  SEL 0.0717  LR 0.0808  G_LR 0.20  LR beats oracle on 1/5 tasks
+  DAMI      n=  3  FIX 0.1180  SEL 0.0644  LR -0.0878  G_LR 1.74  LR beats oracle on 2/3 tasks
+  OddBench  n= 38  FIX 0.1651  SEL 0.0534  LR -0.0620  G_LR 1.38  LR beats oracle on 23/38 tasks
+  OvrBench  n= 66  FIX 0.1262  SEL 0.0676  LR 0.0176  G_LR 0.86  LR beats oracle on 33/66 tasks
