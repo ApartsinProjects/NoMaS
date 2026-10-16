@@ -39,3 +39,4 @@ artifacts/modal/_idx/
 .env
 experiments/pivot/scores/
 experiments/pivot/*.pkl
+.venv-baselines/
