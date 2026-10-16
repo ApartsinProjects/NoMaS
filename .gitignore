@@ -40,3 +40,5 @@ artifacts/modal/_idx/
 experiments/pivot/scores/
 experiments/pivot/*.pkl
 .venv-baselines/
+artifacts/heldout/bv2/*.npz
+experiments/fewlabel/scores_heldout/

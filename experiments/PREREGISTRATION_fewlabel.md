@@ -69,4 +69,18 @@ classes by > 0.02 with CI excluding 0, no new combination is invented to rescue 
 reframed as a label-allocation benchmark with that specialist winning.
 
 ## Amendments
-(none)
+
+A1 (2026-10-16, before any held-out result): DRA dropped. It has no tabular implementation (the official
+code and deepod 0.4.1 do not provide one), and a home-made adaptation of an image method would not be a
+meaningful baseline. The open-set role is taken by PReNet (KDD 2023; designed for unseen-anomaly
+generalization on tabular data) and RoSAS (IP&M 2023), both from deepod 0.4.1. The T3/stop-rule references
+to DRA apply to PReNet and RoSAS instead.
+
+A2 (2026-10-16, before any held-out result): baselines run in an isolated environment (.venv-baselines:
+Python 3.11, scikit-learn 1.7.2, numpy 2.4, torch 2.14, xgboost 3.2, tabpfn 9.2, deepod 0.4.1 installed
+without its stale torch<1.13 pin after verifying all five models train). The 25 unsupervised detector
+scores keep the main environment (scikit-learn 1.8, pyod 3.6.1) used for development. "MetaOD" is a
+MetaOD-style meta-learner (dataset meta-features -> per-detector expected score, trained on development
+tasks, leave-source-family-out), because the released metaod package selects from its own fixed pool, not
+our 25 detectors. "XGBOD" is XGBoost on raw features plus the standardized scores of the 25 detectors
+(the XGBOD feature-augmentation idea on our pool).

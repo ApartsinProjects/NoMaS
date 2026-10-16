@@ -1,0 +1,17 @@
+uninspected candidates: 696 (excluded 4 sharing a development family)
+  50/696  bundled so far 31
+  100/696  bundled so far 51
+  150/696  bundled so far 86
+  200/696  bundled so far 116
+  250/696  bundled so far 144
+  300/696  bundled so far 170
+  350/696  bundled so far 193
+  400/696  bundled so far 220
+  450/696  bundled so far 243
+  500/696  bundled so far 265
+  550/696  bundled so far 299
+  600/696  bundled so far 330
+  650/696  bundled so far 347
+
+status counts: {'bundled': 357, 'screened_out': 324, 'few_test_anomalies': 8, 'dedup': 3, 'too_small': 2, 'error:Unable to allocate 60.1 MiB for an array with shape (720, 10': 1, 'error:Unable to allocate 10.5 MiB for an array with shape (126, 10': 1}
+HELD-OUT POOL: 357 tasks from 352 families | by corpus {'ovrbench': 340, 'oddbench': 17}

@@ -7,8 +7,9 @@ import glob, os, sys, json, warnings
 import numpy as np
 warnings.filterwarnings("ignore")
 HERE = os.path.dirname(os.path.abspath(__file__))
-BUN = os.path.join(HERE, "..", "..", "artifacts", "modal", "bv2")
-OUT = os.path.join(HERE, "scores"); os.makedirs(OUT, exist_ok=True)
+BUN = os.environ.get("BUN") or os.path.join(HERE, "..", "..", "artifacts", "modal", "bv2")
+OUT = os.environ.get("OUT") or os.path.join(HERE, "scores"); os.makedirs(OUT, exist_ok=True)
+NUNI = int(os.environ.get("NUNI", "0"))     # >0: also score NUNI uniform samples in the train box (for EM/MV)
 
 
 def classical_pool():
@@ -38,12 +39,17 @@ def work(f):
     ss = StandardScaler().fit(Xtr); Ztr, Zval = ss.transform(Xtr), ss.transform(Xval)
     Zte = ss.transform(np.vstack([Xtn, Xh])); y = np.r_[np.zeros(len(Xtn)), np.ones(len(Xh))]; r = y.mean()
     out, ap = {"y_te": y.astype(np.int8)}, {}
+    U = None
+    if NUNI > 0:
+        lo, hi = Ztr.min(0), Ztr.max(0)
+        U = lo + np.random.default_rng(0).random((NUNI, Ztr.shape[1])) * np.where(hi > lo, hi - lo, 1.0)
     for nm, ctor in classical_pool():
         try:
             m = ctor(); m.fit(Ztr)
             st = np.asarray(m.decision_function(Zte), np.float32); sv = np.asarray(m.decision_function(Zval), np.float32)
             if not (np.all(np.isfinite(st)) and np.std(st) > 0): continue
             out[f"te__{nm}"] = st; out[f"val__{nm}"] = sv
+            if U is not None: out[f"uni__{nm}"] = np.asarray(m.decision_function(U), np.float32)
             ap[nm] = float((average_precision_score(y, st) - r) / (1 - r))
         except Exception:
             pass
@@ -55,7 +61,7 @@ if __name__ == "__main__":
     from multiprocessing import Pool
     files = sorted(glob.glob(os.path.join(BUN, "*.npz")))
     print(f"{len(files)} tasks", flush=True)
-    with Pool(int(os.environ.get("NW", "3"))) as pool, open(os.path.join(HERE, "ap_classical.jsonl"), "a") as fo:
+    with Pool(int(os.environ.get("NW", "3"))) as pool, open(os.path.join(OUT, "..", "ap_classical.jsonl") if os.environ.get("OUT") else os.path.join(HERE, "ap_classical.jsonl"), "a") as fo:
         for i, (key, ap) in enumerate(pool.imap_unordered(work, files, chunksize=1)):
             if ap is not None: fo.write(json.dumps({"key": key, "ap": ap}) + "\n"); fo.flush()
             if (i + 1) % 20 == 0: print(f"  {i+1}/{len(files)}", flush=True)
